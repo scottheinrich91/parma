@@ -1,1 +1,3 @@
-# parma
+# Parma
+
+Markdown-native wiki.
