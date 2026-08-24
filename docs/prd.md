@@ -1,5 +1,9 @@
 # Product Requirements Document (PRD) — Parma
 
+> **Etymology:** *Parma* is the Quenya (High Elven) word for **"book"** or **"written parchment/scroll"** (and the name of Tengwar Letter #2). It reflects the project's core philosophy: knowledge kept in plain, durable, human-readable text without reliance on an external database engine.
+
+---
+
 ## 1. Overview & Problem Statement
 Knowledge workers, homelabbers, and writers frequently organize their personal notes and documentation in plain-text Markdown vaults (such as Obsidian). Existing self-hosted wiki solutions (e.g., BookStack, MediaWiki, Wiki.js) require heavy relational database backends, proprietary storage schemas, or complex sync pipelines.
 
