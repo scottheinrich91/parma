@@ -31,3 +31,10 @@
 - [ ] Optional basic auth / token authentication for public internet reverse-proxy setups.
 - [ ] Daily notes calendar and template engine.
 - [ ] Excalidraw / Mermaid diagram live rendering in reader mode.
+
+## UI Polish, Themes & Mobile Experience
+- [ ] **Settings Menu Overhaul:** Redesign the Settings modal to look clean, professional, and unified rather than 'vibecoded'.
+- [ ] **Theme Selector Rework:** Polish the theme selector cards, previews, and swatch presentation.
+- [ ] **Custom Theme Section Collapsed by Default:** Make the Custom Theme / Custom CSS editor collapsible and collapsed by default.
+- [ ] **.obsidian Theme Loading Deep Fix:** Fix and robustify .obsidian theme loading so external community themes from .obsidian/themes/ load cleanly and accurately.
+- [ ] **Mobile Tabs & View Overhaul (Obsidian Mobile / Chrome-Style):** Overhaul the mobile layout and mobile tabs experience to follow the Obsidian mobile app view (Chrome-style visual tab switcher, bottom toolbars, swipeable drawers).

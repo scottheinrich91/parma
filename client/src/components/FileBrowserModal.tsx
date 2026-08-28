@@ -34,6 +34,7 @@ export const FileBrowserModal: React.FC<FileBrowserModalProps> = ({
   useRelativePath = true,
 }) => {
   const [currentPath, setCurrentPath] = useState<string>('');
+  const [currentRelativePath, setCurrentRelativePath] = useState<string>('');
   const [parentPath, setParentPath] = useState<string | null>(null);
   const [entries, setEntries] = useState<FsEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<FsEntry | null>(null);
@@ -46,15 +47,36 @@ export const FileBrowserModal: React.FC<FileBrowserModalProps> = ({
     }
   }, [isOpen, initialPath, filter]);
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const loadPath = async (targetPath: string) => {
     setIsLoading(true);
     setErrorMsg(null);
     setSelectedEntry(null);
 
     try {
-      const data: FsBrowseResult = await browseFilesystem(targetPath, filter);
+      const data: FsBrowseResult = await browseFilesystem(
+        targetPath,
+        filter,
+        useRelativePath ? 'vault' : undefined
+      );
       setCurrentPath(data.currentPath);
-      setParentPath(data.parentPath);
+      const rel = data.relativePath || '';
+      setCurrentRelativePath(rel);
+
+      const isAtVaultRoot = useRelativePath && (!rel || rel === '.' || data.currentPath === data.vaultRoot);
+      setParentPath(isAtVaultRoot ? null : data.parentPath);
       setEntries(data.entries);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to browse directory');
@@ -65,7 +87,7 @@ export const FileBrowserModal: React.FC<FileBrowserModalProps> = ({
 
   const handleEntryClick = (entry: FsEntry) => {
     if (entry.isDirectory) {
-      loadPath(entry.path);
+      loadPath(useRelativePath ? entry.relativePath : entry.path);
     } else {
       setSelectedEntry(entry);
     }
@@ -76,7 +98,7 @@ export const FileBrowserModal: React.FC<FileBrowserModalProps> = ({
       // In folder mode, confirm current directory if no subfolder selected
       const resultPath = selectedEntry 
         ? (useRelativePath ? selectedEntry.relativePath : selectedEntry.path)
-        : currentPath;
+        : (useRelativePath ? currentRelativePath : currentPath);
       onSelect(resultPath);
       onClose();
     } else if (selectedEntry) {
@@ -88,12 +110,18 @@ export const FileBrowserModal: React.FC<FileBrowserModalProps> = ({
 
   if (!isOpen) return null;
 
+  const displayPath = useRelativePath
+    ? !currentRelativePath || currentRelativePath === '.'
+      ? '/ (Vault Root)'
+      : `/${currentRelativePath.replace(/^\/+/, '')}`
+    : currentPath;
+
   return (
     <div
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in"
     >
       <div className="bg-[#1f2326] dark:bg-[#181a1c] text-[#e5a00d] dark:text-[#e5a00d] rounded-xl shadow-2xl max-w-2xl w-full border border-neutral-800 overflow-hidden font-sans flex flex-col h-[520px]">
         {/* Plex Style Modal Header */}
@@ -113,8 +141,12 @@ export const FileBrowserModal: React.FC<FileBrowserModalProps> = ({
         {/* Current Path Bar */}
         <div className="p-4 bg-[#1f2326] border-b border-neutral-800">
           <div className="flex items-center gap-2 px-3 py-2 rounded bg-[#141618] border border-neutral-800 text-xs font-mono text-neutral-200">
-            <HardDrive className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
-            <span className="truncate flex-1">{currentPath}</span>
+            {useRelativePath ? (
+              <Folder className="w-3.5 h-3.5 text-[#e5a00d] flex-shrink-0" />
+            ) : (
+              <HardDrive className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
+            )}
+            <span className="truncate flex-1">{displayPath}</span>
           </div>
         </div>
 

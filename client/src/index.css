@@ -7,16 +7,8 @@
     color-scheme: light dark;
   }
 
-  html {
-    background-color: #f8fafc;
-  }
-
-  html.dark {
-    background-color: #0f172a;
-  }
-
   body {
-    @apply antialiased font-sans text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900;
+    @apply antialiased font-sans text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-950;
   }
 }
 
@@ -135,3 +127,239 @@
 .wikilink-ghost {
   @apply inline-flex items-center gap-1 font-normal text-rose-500/80 dark:text-rose-400/80 bg-rose-50/40 dark:bg-rose-950/20 px-1.5 py-0.5 rounded border border-dashed border-rose-300/60 dark:border-rose-800/60 transition-all cursor-pointer no-underline hover:text-rose-600 dark:hover:text-rose-300;
 }
+
+/* Generic Table Wrapper and Note Table Styles (Light and Dark Mode) */
+.table-wrapper {
+  @apply my-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm;
+}
+
+table.note-table {
+  @apply w-full text-sm border-collapse font-sans;
+}
+
+table.note-table thead tr {
+  @apply bg-slate-100/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700;
+}
+
+table.note-table th {
+  @apply px-4 py-3 font-semibold text-slate-900 dark:text-slate-100 text-xs uppercase tracking-wider font-sans border-b border-slate-200 dark:border-slate-700;
+}
+
+table.note-table td {
+  @apply px-4 py-3 border-b border-slate-100 dark:border-slate-800/60 text-slate-700 dark:text-slate-300 font-sans;
+}
+
+table.note-table tr:last-child td {
+  @apply border-b-0;
+}
+
+table.note-table tbody tr:hover {
+  @apply bg-slate-50/60 dark:bg-slate-900/40;
+}
+
+table.note-table tbody tr:nth-child(even) {
+  @apply bg-slate-50/40 dark:bg-slate-900/20;
+}
+
+/* Visual Editor Content Typography */
+.visual-editor-content {
+  font-family: 'Charter', 'Georgia', 'Cambria', serif;
+  line-height: 1.75;
+  outline: none;
+}
+
+.visual-editor-content h1,
+.visual-editor-content h2,
+.visual-editor-content h3,
+.visual-editor-content h4 {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.visual-editor-content h1 {
+  @apply text-3xl font-bold tracking-tight pb-3 mb-6 border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-50;
+}
+
+.visual-editor-content h2 {
+  @apply text-2xl font-semibold tracking-tight pb-2 mt-8 mb-4 border-b border-slate-100 dark:border-slate-800/60 text-slate-900 dark:text-slate-100;
+}
+
+.visual-editor-content h3 {
+  @apply text-xl font-semibold tracking-tight mt-6 mb-3 text-slate-800 dark:text-slate-200;
+}
+
+.visual-editor-content p {
+  @apply mb-4 text-[1.0625rem] text-slate-700 dark:text-slate-300;
+}
+
+.visual-editor-content a {
+  @apply text-blue-600 dark:text-blue-400 underline decoration-blue-300 dark:decoration-blue-700 decoration-1 underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300 hover:decoration-2 transition-colors;
+}
+
+.visual-editor-content .wikilink {
+  @apply inline-flex items-center gap-1 font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-blue-50/70 dark:bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-200/60 dark:border-blue-800/60 transition-all cursor-pointer no-underline;
+}
+
+.visual-editor-content .wikilink-ghost {
+  @apply inline-flex items-center gap-1 font-normal text-rose-500/80 dark:text-rose-400/80 bg-rose-50/40 dark:bg-rose-950/20 px-1.5 py-0.5 rounded border border-dashed border-rose-300/60 dark:border-rose-800/60 transition-all cursor-pointer no-underline hover:text-rose-600 dark:hover:text-rose-300;
+}
+
+.visual-editor-content blockquote {
+  @apply border-l-4 border-slate-300 dark:border-slate-700 pl-4 py-1 my-4 italic text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/20 rounded-r;
+}
+
+.visual-editor-content pre {
+  @apply my-5 p-4 rounded-lg bg-slate-900 text-slate-100 dark:bg-slate-900/90 text-sm font-mono overflow-x-auto border border-slate-800 shadow-sm leading-relaxed;
+}
+
+.visual-editor-content code:not(pre code) {
+  @apply px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-sm border border-slate-200 dark:border-slate-700;
+}
+
+.visual-editor-content ul {
+  @apply list-disc list-outside pl-6 my-4 space-y-1.5 text-slate-700 dark:text-slate-300;
+}
+
+.visual-editor-content ol {
+  @apply list-decimal list-outside pl-6 my-4 space-y-1.5 text-slate-700 dark:text-slate-300;
+}
+
+.visual-editor-content hr {
+  @apply my-8 border-t border-slate-200 dark:border-slate-800;
+}
+
+/* Native Obsidian Callout CSS Variable System */
+.callout {
+  --callout-color: #3b82f6;
+  border-left-color: var(--callout-color) !important;
+  background-color: color-mix(in srgb, var(--callout-color) 12%, transparent);
+}
+
+.callout-header,
+.callout-icon,
+.callout .callout-header,
+.callout .callout-icon {
+  color: var(--callout-color) !important;
+}
+
+/* Callout Type Color Mappings */
+.callout[data-callout="note" i],
+.callout[data-callout-type="note" i],
+.callout-note {
+  --callout-color: #3b82f6;
+}
+
+.callout[data-callout="abstract" i],
+.callout[data-callout-type="abstract" i],
+.callout[data-callout="summary" i],
+.callout[data-callout-type="summary" i],
+.callout[data-callout="tldr" i],
+.callout[data-callout-type="tldr" i],
+.callout-abstract,
+.callout-summary,
+.callout-tldr {
+  --callout-color: #06b6d4;
+}
+
+.callout[data-callout="info" i],
+.callout[data-callout-type="info" i],
+.callout-info {
+  --callout-color: #0ea5e9;
+}
+
+.callout[data-callout="todo" i],
+.callout[data-callout-type="todo" i],
+.callout-todo {
+  --callout-color: #6366f1;
+}
+
+.callout[data-callout="tip" i],
+.callout[data-callout-type="tip" i],
+.callout[data-callout="hint" i],
+.callout[data-callout-type="hint" i],
+.callout[data-callout="important" i],
+.callout[data-callout-type="important" i],
+.callout-tip,
+.callout-hint,
+.callout-important {
+  --callout-color: #10b981;
+}
+
+.callout[data-callout="success" i],
+.callout[data-callout-type="success" i],
+.callout[data-callout="check" i],
+.callout[data-callout-type="check" i],
+.callout[data-callout="done" i],
+.callout[data-callout-type="done" i],
+.callout-success,
+.callout-check,
+.callout-done {
+  --callout-color: #22c55e;
+}
+
+.callout[data-callout="question" i],
+.callout[data-callout-type="question" i],
+.callout[data-callout="help" i],
+.callout[data-callout-type="help" i],
+.callout[data-callout="faq" i],
+.callout[data-callout-type="faq" i],
+.callout-question,
+.callout-help,
+.callout-faq {
+  --callout-color: #f59e0b;
+}
+
+.callout[data-callout="warning" i],
+.callout[data-callout-type="warning" i],
+.callout[data-callout="caution" i],
+.callout[data-callout-type="caution" i],
+.callout[data-callout="attention" i],
+.callout[data-callout-type="attention" i],
+.callout-warning,
+.callout-caution,
+.callout-attention {
+  --callout-color: #f97316;
+}
+
+.callout[data-callout="failure" i],
+.callout[data-callout-type="failure" i],
+.callout[data-callout="fail" i],
+.callout[data-callout-type="fail" i],
+.callout[data-callout="missing" i],
+.callout[data-callout-type="missing" i],
+.callout-failure,
+.callout-fail,
+.callout-missing {
+  --callout-color: #ef4444;
+}
+
+.callout[data-callout="danger" i],
+.callout[data-callout-type="danger" i],
+.callout[data-callout="error" i],
+.callout[data-callout-type="error" i],
+.callout-danger,
+.callout-error {
+  --callout-color: #e11d48;
+}
+
+.callout[data-callout="bug" i],
+.callout[data-callout-type="bug" i],
+.callout-bug {
+  --callout-color: #ec4899;
+}
+
+.callout[data-callout="example" i],
+.callout[data-callout-type="example" i],
+.callout-example {
+  --callout-color: #a855f7;
+}
+
+.callout[data-callout="quote" i],
+.callout[data-callout-type="quote" i],
+.callout[data-callout="cite" i],
+.callout[data-callout-type="cite" i],
+.callout-quote,
+.callout-cite {
+  --callout-color: #94a3b8;
+}
+
+

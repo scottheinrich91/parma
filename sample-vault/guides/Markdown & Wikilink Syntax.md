@@ -19,22 +19,53 @@ If a linked note does not exist yet, Parma renders the link in a distinct muted 
 
 ## 📢 2. Callouts (`> [!TYPE]`)
 
-Parma supports GitHub and Obsidian style alert callouts:
+Parma supports all standard Obsidian-style callout blocks with customizable titles and foldability (`+` for open by default, `-` for collapsed by default):
 
-> [!NOTE]
-> Useful information that users should know, even when skimming.
+```markdown
+> [!TYPE] Optional Custom Title
+> Callout body text goes here.
+```
 
-> [!TIP]
-> Helpful advice for doing things better or more easily.
+### All 13 Standard Callout Types
 
-> [!IMPORTANT]
-> Key information users need to know to achieve their goal.
+> [!NOTE] General Note
+> Useful background information and context that readers should take note of when reading.
 
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
+> [!ABSTRACT] Executive Summary
+> A concise overview or TL;DR summarizing the core takeaways of a longer document.
 
-> [!CAUTION]
-> Advises about risks or negative outcomes of an action.
+> [!INFO] Live Vault Synchronization
+> Parma detects file system modifications instantly and updates client views in real time.
+
+> [!TODO] Pending Vault Tasks
+> Track pending tasks, upcoming milestones, and routine household maintenance checklists.
+
+> [!TIP] Keyboard Shortcuts
+> Press <kbd>⌘</kbd> + <kbd>K</kbd> (or <kbd>Ctrl</kbd> + <kbd>K</kbd>) to trigger instant omnibox search and heading navigation.
+
+> [!SUCCESS] Backup Operation Completed
+> Verified snapshot of vault contents was safely archived to redundant secondary storage.
+
+> [!QUESTION] Need Syntax Help?
+> Parma renders standard Markdown, GitHub-Flavored Markdown (GFM), math formulas, and Obsidian wikilinks.
+
+> [!WARNING] Descaling Warning
+> Mineral scale accumulation can damage internal heating elements if regular maintenance is neglected.
+
+> [!FAILURE] Gateway Connection Failed
+> Unable to establish link with the remote sync target. Verify your network credentials and routing.
+
+> [!DANGER] High Voltage Isolation
+> Always disconnect the main electrical breaker before servicing major household appliances.
+
+> [!BUG] Known Rendering Issue
+> Certain mobile browsers may miscalculate viewport height during active virtual keyboard input.
+
+> [!EXAMPLE] Stepless Grinder Dial-in
+> For an 18g double espresso basket, aim for a 36g liquid yield in 25–30 seconds at 9 bars of pressure.
+
+> [!QUOTE] Antoine de Saint-Exupéry
+> Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.
 
 ---
 

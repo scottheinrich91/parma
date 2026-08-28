@@ -15,7 +15,9 @@ import { mediaRouter } from './routes/media.js';
 import { createGraphRouter } from './routes/graph.js';
 import { createSearchRouter } from './routes/search.js';
 import { createVaultsRouter } from './routes/vaults.js';
-import { fsRouter } from './routes/fs.js';
+import { createFsRouter } from './routes/fs.js';
+import { themeRouter } from './routes/theme.js';
+import { bookmarksRouter } from './routes/bookmarks.js';
 
 export function createApp() {
   const app = new Hono();
@@ -75,6 +77,7 @@ export function createApp() {
     setupWatcher(newPath);
     triggerReindex();
   });
+  const fsRouter = createFsRouter(triggerReindex);
 
   app.route('/api/tree', treeRouter);
   app.route('/api/note', noteRouter);
@@ -83,6 +86,8 @@ export function createApp() {
   app.route('/api/media', mediaRouter);
   app.route('/api/vaults', vaultsRouter);
   app.route('/api/fs', fsRouter);
+  app.route('/api/theme', themeRouter);
+  app.route('/api/bookmarks', bookmarksRouter);
 
   const assetsRouter = new Hono();
   assetsRouter.post('/', async (c) => uploadRouter.fetch(c.req.raw));

@@ -1,0 +1,9 @@
+{
+  "baseFontSize": 16,
+  "theme": "obsidian",
+  "cssTheme": "Minimal",
+  "accentColor": "#7c3aed",
+  "enabledCssSnippets": [
+    "custom-callouts"
+  ]
+}

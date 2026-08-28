@@ -1,0 +1,5 @@
+/* Custom Snippet: Recipe Callout */
+.callout[data-callout="recipe"] {
+  --callout-color: #f59e0b;
+  --callout-icon: lucide-utensils;
+}

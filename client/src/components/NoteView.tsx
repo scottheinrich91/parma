@@ -8,8 +8,7 @@ import {
   ExternalLink, 
   FilePlus, 
   Maximize2, 
-  X,
-  Tag
+  X
 } from 'lucide-react';
 import { NoteData } from '../types';
 import { Callout } from './Callout';
@@ -84,6 +83,7 @@ export const NoteView: React.FC<NoteViewProps> = ({
     let calloutType = 'note';
     let calloutTitle = '';
     let calloutIsFoldable = false;
+    let calloutDefaultFolded = false;
     let calloutBuffer: string[] = [];
 
     let inTable = false;
@@ -124,19 +124,23 @@ export const NoteView: React.FC<NoteViewProps> = ({
     };
 
     const flushCallout = (key: string) => {
-      const calloutText = calloutBuffer.join('\n');
+      const calloutText = calloutBuffer.join('\n').trim();
+      const hasBody = calloutBuffer.length > 0 && calloutText.length > 0;
       elements.push(
         <Callout
           key={key}
           type={calloutType}
           title={calloutTitle}
           isFoldable={calloutIsFoldable}
+          defaultFolded={calloutDefaultFolded}
         >
-          <div className="space-y-2">
-            {calloutText.split('\n').map((cl, i) => (
-              <p key={i}>{parseInlineFormatting(cl)}</p>
-            ))}
-          </div>
+          {hasBody ? (
+            <div className="space-y-2">
+              {calloutBuffer.map((cl, i) => (
+                <p key={i}>{parseInlineFormatting(cl)}</p>
+              ))}
+            </div>
+          ) : undefined}
         </Callout>
       );
       calloutBuffer = [];
@@ -409,15 +413,17 @@ export const NoteView: React.FC<NoteViewProps> = ({
         continue;
       }
 
-      // Callouts: > [!NOTE] or > [!NOTE]- Foldable
-      const calloutMatch = line.match(/^>\s+\[!([a-zA-Z]+)\](-)?\s*(.*)$/);
+      // Callouts: > [!NOTE] or > [!NOTE]+ or > [!NOTE]- Foldable
+      const calloutMatch = line.match(/^>\s*\[!([a-zA-Z0-9_-]+)\]([+-])?\s*(.*)$/);
       if (calloutMatch) {
         if (inCallout) flushCallout(`co-${i}`);
         if (inTable) flushTable(`tb-${i}`);
         inCallout = true;
         calloutType = calloutMatch[1];
-        calloutIsFoldable = !!calloutMatch[2];
-        calloutTitle = calloutMatch[3] || '';
+        const foldMod = calloutMatch[2];
+        calloutIsFoldable = foldMod === '+' || foldMod === '-';
+        calloutDefaultFolded = foldMod === '-';
+        calloutTitle = calloutMatch[3]?.trim() || '';
         continue;
       }
 
@@ -627,23 +633,6 @@ export const NoteView: React.FC<NoteViewProps> = ({
         </div>
       </div>
 
-      {/* Frontmatter display if available */}
-      {note.frontmatter && Object.keys(note.frontmatter).length > 0 && (
-        <div className="mb-6 p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs font-sans">
-          <div className="flex items-center gap-1.5 font-semibold text-slate-600 dark:text-slate-300 mb-2 uppercase tracking-wider text-[10px]">
-            <Tag className="w-3 h-3 text-blue-500" />
-            <span>Properties & Metadata</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {Object.entries(note.frontmatter).map(([k, v]) => (
-              <div key={k} className="p-1.5 rounded bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">{k}</span>
-                <span className="font-medium text-slate-800 dark:text-slate-200 truncate block">{String(v)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Rendered Body */}
       <div className="wiki-body">

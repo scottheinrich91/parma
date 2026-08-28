@@ -15,6 +15,8 @@ interface DirectoryViewProps {
   tree: VaultNode[];
   onOpenNote: (path: string) => void;
   onOpenDirectory: (path: string) => void;
+  onNoteContextMenu?: (path: string, e: React.MouseEvent) => void;
+  onFolderContextMenu?: (path: string, e: React.MouseEvent) => void;
 }
 
 export const DirectoryView: React.FC<DirectoryViewProps> = ({
@@ -22,6 +24,8 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({
   tree,
   onOpenNote,
   onOpenDirectory,
+  onNoteContextMenu,
+  onFolderContextMenu,
 }) => {
   // Find the target directory node in the tree recursively
   const findDirectory = (nodes: VaultNode[], targetPath: string): VaultNode | null => {
@@ -65,7 +69,7 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({
               {dirName}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-              📁 {directoryPath}
+              {directoryPath}
             </p>
           </div>
         </div>
@@ -90,6 +94,12 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({
                 <div
                   key={sub.path}
                   onClick={() => onOpenDirectory(sub.path)}
+                  onContextMenu={(e) => {
+                    if (onFolderContextMenu) {
+                      e.preventDefault();
+                      onFolderContextMenu(sub.path, e);
+                    }
+                  }}
                   className="group flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500/60 shadow-xs hover:shadow-md transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -135,6 +145,12 @@ export const DirectoryView: React.FC<DirectoryViewProps> = ({
                 <div
                   key={file.path}
                   onClick={() => onOpenNote(file.path)}
+                  onContextMenu={(e) => {
+                    if (onNoteContextMenu) {
+                      e.preventDefault();
+                      onNoteContextMenu(file.path, e);
+                    }
+                  }}
                   className="group flex flex-col justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500/60 shadow-xs hover:shadow-md transition-all cursor-pointer"
                 >
                   <div className="flex items-start gap-3">

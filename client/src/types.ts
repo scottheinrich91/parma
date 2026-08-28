@@ -6,6 +6,7 @@ export interface VaultNode {
   extension?: string;
   size?: number;
   updatedAt?: string;
+  createdAt?: string;
   children?: VaultNode[];
 }
 
@@ -75,4 +76,36 @@ export interface UploadResponse {
   mediaUrl: string;
   caption?: string;
   markdownSnippet: string;
+}
+
+export type BookmarkType = 'file' | 'folder' | 'group' | 'search' | 'url';
+
+export interface BookmarkItem {
+  type: BookmarkType;
+  title?: string;
+  path?: string;
+  query?: string;
+  url?: string;
+  ctime?: number;
+  items?: BookmarkItem[];
+}
+
+export interface BookmarksResponse {
+  items: BookmarkItem[];
+}
+
+export type SortOrder =
+  | 'name-asc'
+  | 'name-desc'
+  | 'mtime-desc'
+  | 'mtime-asc'
+  | 'ctime-desc'
+  | 'ctime-asc';
+
+export interface NoteTab {
+  id: string;
+  path: string;
+  title: string;
+  isPinned: boolean;
+  isDir: boolean;
 }

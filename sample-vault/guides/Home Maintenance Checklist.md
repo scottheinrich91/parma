@@ -6,7 +6,7 @@
 ---
 
 ## 🌸 Spring Checklist
-- [ ] Inspect [[appliances/HVAC & Heat Pump|Heat Pump outdoor condenser]] and clear winter foliage.
+- [x] Inspect [[appliances/HVAC & Heat Pump|Heat Pump outdoor condenser]] and clear winter foliage.
 - [ ] Flush sediment from water heater drain valve.
 - [ ] Test all sump pumps and emergency battery backup systems.
 - [ ] Inspect roof shingles and clean gutter downspouts.

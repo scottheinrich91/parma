@@ -8,7 +8,7 @@
     "client"
   ],
   "scripts": {
-    "dev:server": "npm run dev --workspace=server",
+    "dev:server": "VAULT_DIR=../sample-vault npm run dev --workspace=server",
     "dev:client": "npm run dev --workspace=client",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build:server": "npm run build --workspace=server",

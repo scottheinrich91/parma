@@ -20,8 +20,460 @@
     <!-- Web App Manifest & Dynamic Theme Color -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" id="theme-color-meta" content="#f8fafc" />
+
+    <!-- Synchronous early theme & dark mode initialization script to eliminate FOUC -->
+    <script>
+      (function () {
+        try {
+          var THEMES = {
+            'parma-classic': {
+              light: {
+                '--background-primary': '#ffffff',
+                '--background-primary-alt': '#f8fafc',
+                '--background-secondary': '#f8fafc',
+                '--background-secondary-alt': '#f1f5f9',
+                '--background-modifier-border': '#e2e8f0',
+                '--background-modifier-form-field': '#f8fafc',
+                '--text-normal': '#0f172a',
+                '--text-muted': '#64748b',
+                '--text-faint': '#94a3b8',
+                '--text-accent': '#2563eb',
+                '--text-accent-hover': '#1d4ed8',
+                '--interactive-accent': '#2563eb',
+                '--interactive-accent-hover': '#1d4ed8',
+                '--nav-item-background-active': '#eff6ff',
+                '--nav-item-color-active': '#1d4ed8',
+                '--code-background': '#0f172a',
+                '--code-normal': '#f8fafc',
+                '--font-ui': "'Inter', system-ui, -apple-system, sans-serif",
+                '--font-article': "'Charter', 'Georgia', 'Cambria', serif",
+                '--font-heading': "'Inter', system-ui, -apple-system, sans-serif",
+                '--font-mono': "'JetBrains Mono', 'Fira Code', monospace"
+              },
+              dark: {
+                '--background-primary': '#0f172a',
+                '--background-primary-alt': '#0b1120',
+                '--background-secondary': '#020617',
+                '--background-secondary-alt': '#1e293b',
+                '--background-modifier-border': '#334155',
+                '--background-modifier-form-field': '#1e293b',
+                '--text-normal': '#f8fafc',
+                '--text-muted': '#94a3b8',
+                '--text-faint': '#64748b',
+                '--text-accent': '#38bdf8',
+                '--text-accent-hover': '#7dd3fc',
+                '--interactive-accent': '#3b82f6',
+                '--interactive-accent-hover': '#60a5fa',
+                '--nav-item-background-active': 'rgba(59, 130, 246, 0.18)',
+                '--nav-item-color-active': '#93c5fd',
+                '--code-background': '#020617',
+                '--code-normal': '#f8fafc',
+                '--font-ui': "'Inter', system-ui, -apple-system, sans-serif",
+                '--font-article': "'Charter', 'Georgia', 'Cambria', serif",
+                '--font-heading': "'Inter', system-ui, -apple-system, sans-serif",
+                '--font-mono': "'JetBrains Mono', 'Fira Code', monospace"
+              }
+            },
+            'obsidian-minimal': {
+              light: {
+                '--background-primary': '#ffffff',
+                '--background-primary-alt': '#fcfcfc',
+                '--background-secondary': '#fafafa',
+                '--background-secondary-alt': '#f4f4f5',
+                '--background-modifier-border': '#e4e4e7',
+                '--background-modifier-form-field': '#f4f4f5',
+                '--text-normal': '#18181b',
+                '--text-muted': '#71717a',
+                '--text-faint': '#a1a1aa',
+                '--text-accent': '#e11d48',
+                '--text-accent-hover': '#be123c',
+                '--interactive-accent': '#e11d48',
+                '--interactive-accent-hover': '#be123c',
+                '--nav-item-background-active': '#ffe4e6',
+                '--nav-item-color-active': '#be123c',
+                '--code-background': '#18181b',
+                '--code-normal': '#fafafa',
+                '--font-ui': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                '--font-article': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                '--font-heading': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                '--font-mono': "'SF Mono', 'Roboto Mono', 'Menlo', monospace"
+              },
+              dark: {
+                '--background-primary': '#000000',
+                '--background-primary-alt': '#080808',
+                '--background-secondary': '#0d0d0d',
+                '--background-secondary-alt': '#141414',
+                '--background-modifier-border': '#262626',
+                '--background-modifier-form-field': '#141414',
+                '--text-normal': '#ffffff',
+                '--text-muted': '#8e8e93',
+                '--text-faint': '#52525b',
+                '--text-accent': '#f43f5e',
+                '--text-accent-hover': '#fb7185',
+                '--interactive-accent': '#f43f5e',
+                '--interactive-accent-hover': '#fb7185',
+                '--nav-item-background-active': 'rgba(244, 63, 94, 0.18)',
+                '--nav-item-color-active': '#fecdd3',
+                '--code-background': '#000000',
+                '--code-normal': '#f4f4f5',
+                '--font-ui': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                '--font-article': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                '--font-heading': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                '--font-mono': "'SF Mono', 'Roboto Mono', 'Menlo', monospace"
+              }
+            },
+            'things': {
+              light: {
+                '--background-primary': '#ffffff',
+                '--background-primary-alt': '#fbfbfd',
+                '--background-secondary': '#f5f6f8',
+                '--background-secondary-alt': '#eceef2',
+                '--background-modifier-border': '#e2e5eb',
+                '--background-modifier-form-field': '#f5f6f8',
+                '--text-normal': '#27292d',
+                '--text-muted': '#6b7280',
+                '--text-faint': '#9ca3af',
+                '--text-accent': '#007aff',
+                '--text-accent-hover': '#0056b3',
+                '--interactive-accent': '#007aff',
+                '--interactive-accent-hover': '#0056b3',
+                '--nav-item-background-active': '#e5f1ff',
+                '--nav-item-color-active': '#007aff',
+                '--code-background': '#27292d',
+                '--code-normal': '#f5f6f8',
+                '--font-ui': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-article': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-heading': '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif',
+                '--font-mono': "'SF Mono', 'Menlo', monospace"
+              },
+              dark: {
+                '--background-primary': '#191b1f',
+                '--background-primary-alt': '#141518',
+                '--background-secondary': '#131417',
+                '--background-secondary-alt': '#22252a',
+                '--background-modifier-border': '#2d3139',
+                '--background-modifier-form-field': '#22252a',
+                '--text-normal': '#f0f2f5',
+                '--text-muted': '#9aa0a6',
+                '--text-faint': '#5f6368',
+                '--text-accent': '#3b99fc',
+                '--text-accent-hover': '#6cb3ff',
+                '--interactive-accent': '#3b99fc',
+                '--interactive-accent-hover': '#6cb3ff',
+                '--nav-item-background-active': 'rgba(59, 153, 252, 0.18)',
+                '--nav-item-color-active': '#6cb3ff',
+                '--code-background': '#131417',
+                '--code-normal': '#f0f2f5',
+                '--font-ui': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-article': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-heading': '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif',
+                '--font-mono': "'SF Mono', 'Menlo', monospace"
+              }
+            },
+            'anuppuccin': {
+              light: {
+                '--background-primary': '#eff1f5',
+                '--background-primary-alt': '#e6e9ef',
+                '--background-secondary': '#e6e9ef',
+                '--background-secondary-alt': '#ccd0da',
+                '--background-modifier-border': '#bcc0cc',
+                '--background-modifier-form-field': '#e6e9ef',
+                '--text-normal': '#4c4f69',
+                '--text-muted': '#6c6f85',
+                '--text-faint': '#8c8fa1',
+                '--text-accent': '#8839ef',
+                '--text-accent-hover': '#7287fd',
+                '--interactive-accent': '#8839ef',
+                '--interactive-accent-hover': '#7287fd',
+                '--nav-item-background-active': 'rgba(136, 57, 239, 0.15)',
+                '--nav-item-color-active': '#8839ef',
+                '--code-background': '#292c3c',
+                '--code-normal': '#c6d0f5',
+                '--font-ui': "'Nunito', 'Inter', system-ui, -apple-system, sans-serif",
+                '--font-article': "'Nunito', 'Inter', system-ui, -apple-system, sans-serif",
+                '--font-heading': "'Nunito', 'Inter', system-ui, -apple-system, sans-serif",
+                '--font-mono': "'Fira Code', 'JetBrains Mono', monospace"
+              },
+              dark: {
+                '--background-primary': '#1e1e2e',
+                '--background-primary-alt': '#181825',
+                '--background-secondary': '#181825',
+                '--background-secondary-alt': '#313244',
+                '--background-modifier-border': '#45475a',
+                '--background-modifier-form-field': '#313244',
+                '--text-normal': '#cdd6f4',
+                '--text-muted': '#a6adc8',
+                '--text-faint': '#6c7086',
+                '--text-accent': '#cba6f7',
+                '--text-accent-hover': '#b4befe',
+                '--interactive-accent': '#cba6f7',
+                '--interactive-accent-hover': '#b4befe',
+                '--nav-item-background-active': 'rgba(203, 166, 247, 0.18)',
+                '--nav-item-color-active': '#cba6f7',
+                '--code-background': '#11111b',
+                '--code-normal': '#cdd6f4',
+                '--font-ui': "'Nunito', 'Inter', system-ui, -apple-system, sans-serif",
+                '--font-article': "'Nunito', 'Inter', system-ui, -apple-system, sans-serif",
+                '--font-heading': "'Nunito', 'Inter', system-ui, -apple-system, sans-serif",
+                '--font-mono': "'Fira Code', 'JetBrains Mono', monospace"
+              }
+            },
+            'obsidian-nord': {
+              light: {
+                '--background-primary': '#eceff4',
+                '--background-primary-alt': '#e5e9f0',
+                '--background-secondary': '#e5e9f0',
+                '--background-secondary-alt': '#d8dee9',
+                '--background-modifier-border': '#c2c9d6',
+                '--background-modifier-form-field': '#e5e9f0',
+                '--text-normal': '#2e3440',
+                '--text-muted': '#434c5e',
+                '--text-faint': '#4c566a',
+                '--text-accent': '#5e81ac',
+                '--text-accent-hover': '#81a1c1',
+                '--interactive-accent': '#5e81ac',
+                '--interactive-accent-hover': '#81a1c1',
+                '--nav-item-background-active': 'rgba(94, 129, 172, 0.18)',
+                '--nav-item-color-active': '#5e81ac',
+                '--code-background': '#2e3440',
+                '--code-normal': '#eceff4',
+                '--font-ui': "'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-article': "'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-heading': "'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-mono': "'JetBrains Mono', 'Source Code Pro', monospace"
+              },
+              dark: {
+                '--background-primary': '#2e3440',
+                '--background-primary-alt': '#242933',
+                '--background-secondary': '#242933',
+                '--background-secondary-alt': '#3b4252',
+                '--background-modifier-border': '#434c5e',
+                '--background-modifier-form-field': '#3b4252',
+                '--text-normal': '#eceff4',
+                '--text-muted': '#d8dee9',
+                '--text-faint': '#616e88',
+                '--text-accent': '#88c0d0',
+                '--text-accent-hover': '#8fbcbb',
+                '--interactive-accent': '#88c0d0',
+                '--interactive-accent-hover': '#81a1c1',
+                '--nav-item-background-active': 'rgba(136, 192, 208, 0.18)',
+                '--nav-item-color-active': '#88c0d0',
+                '--code-background': '#1e222a',
+                '--code-normal': '#eceff4',
+                '--font-ui': "'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-article': "'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-heading': "'Rubik', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-mono': "'JetBrains Mono', 'Source Code Pro', monospace"
+              }
+            },
+            'atom': {
+              light: {
+                '--background-primary': '#fafafa',
+                '--background-primary-alt': '#f0f0f0',
+                '--background-secondary': '#f0f0f0',
+                '--background-secondary-alt': '#e5e5e6',
+                '--background-modifier-border': '#dcdcdc',
+                '--background-modifier-form-field': '#f0f0f0',
+                '--text-normal': '#383a42',
+                '--text-muted': '#696c77',
+                '--text-faint': '#a0a1a7',
+                '--text-accent': '#0184bc',
+                '--text-accent-hover': '#4078f2',
+                '--interactive-accent': '#0184bc',
+                '--interactive-accent-hover': '#4078f2',
+                '--nav-item-background-active': 'rgba(1, 132, 188, 0.12)',
+                '--nav-item-color-active': '#0184bc',
+                '--code-background': '#282c34',
+                '--code-normal': '#abb2bf',
+                '--font-ui': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-article': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-heading': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-mono': "'Fira Code', 'Source Code Pro', 'Menlo', monospace"
+              },
+              dark: {
+                '--background-primary': '#282c34',
+                '--background-primary-alt': '#21252b',
+                '--background-secondary': '#21252b',
+                '--background-secondary-alt': '#2c313a',
+                '--background-modifier-border': '#3a3f4b',
+                '--background-modifier-form-field': '#21252b',
+                '--text-normal': '#abb2bf',
+                '--text-muted': '#828997',
+                '--text-faint': '#5c6370',
+                '--text-accent': '#61afef',
+                '--text-accent-hover': '#98c379',
+                '--interactive-accent': '#61afef',
+                '--interactive-accent-hover': '#528bff',
+                '--nav-item-background-active': 'rgba(97, 175, 239, 0.16)',
+                '--nav-item-color-active': '#61afef',
+                '--code-background': '#1e2227',
+                '--code-normal': '#abb2bf',
+                '--font-ui': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-article': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-heading': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                '--font-mono': "'Fira Code', 'Source Code Pro', 'Menlo', monospace"
+              }
+            },
+            'solarized': {
+              light: {
+                '--background-primary': '#fdf6e3',
+                '--background-primary-alt': '#f5eed9',
+                '--background-secondary': '#eee8d5',
+                '--background-secondary-alt': '#e0d9c4',
+                '--background-modifier-border': '#d5cdb5',
+                '--background-modifier-form-field': '#eee8d5',
+                '--text-normal': '#657b83',
+                '--text-muted': '#93a1a1',
+                '--text-faint': '#b3a890',
+                '--text-accent': '#2aa198',
+                '--text-accent-hover': '#859900',
+                '--interactive-accent': '#2aa198',
+                '--interactive-accent-hover': '#859900',
+                '--nav-item-background-active': 'rgba(42, 161, 152, 0.18)',
+                '--nav-item-color-active': '#2aa198',
+                '--code-background': '#002b36',
+                '--code-normal': '#93a1a1',
+                '--font-ui': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '--font-article': "'Charter', 'Georgia', 'Cambria', serif",
+                '--font-heading': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '--font-mono': "'Source Code Pro', 'Courier New', monospace"
+              },
+              dark: {
+                '--background-primary': '#002b36',
+                '--background-primary-alt': '#00212b',
+                '--background-secondary': '#073642',
+                '--background-secondary-alt': '#0a4756',
+                '--background-modifier-border': '#0e5264',
+                '--background-modifier-form-field': '#073642',
+                '--text-normal': '#839496',
+                '--text-muted': '#586e75',
+                '--text-faint': '#3d525a',
+                '--text-accent': '#2aa198',
+                '--text-accent-hover': '#859900',
+                '--interactive-accent': '#2aa198',
+                '--interactive-accent-hover': '#859900',
+                '--nav-item-background-active': 'rgba(42, 161, 152, 0.22)',
+                '--nav-item-color-active': '#2aa198',
+                '--code-background': '#00212b',
+                '--code-normal': '#839496',
+                '--font-ui': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '--font-article': "'Charter', 'Georgia', 'Cambria', serif",
+                '--font-heading': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '--font-mono': "'Source Code Pro', 'Courier New', monospace"
+              }
+            },
+            'cupertino': {
+              light: {
+                '--background-primary': '#f5f5f7',
+                '--background-primary-alt': '#ffffff',
+                '--background-secondary': '#ffffff',
+                '--background-secondary-alt': '#e5e5ea',
+                '--background-modifier-border': '#d1d1d6',
+                '--background-modifier-form-field': '#ffffff',
+                '--text-normal': '#1d1d1f',
+                '--text-muted': '#86868b',
+                '--text-faint': '#a1a1a6',
+                '--text-accent': '#007aff',
+                '--text-accent-hover': '#0071e3',
+                '--interactive-accent': '#007aff',
+                '--interactive-accent-hover': '#0071e3',
+                '--nav-item-background-active': 'rgba(0, 122, 255, 0.14)',
+                '--nav-item-color-active': '#007aff',
+                '--code-background': '#1d1d1f',
+                '--code-normal': '#f5f5f7',
+                '--font-ui': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-article': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-heading': '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif',
+                '--font-mono': "'SF Mono', 'Menlo', monospace"
+              },
+              dark: {
+                '--background-primary': '#1c1c1e',
+                '--background-primary-alt': '#2c2c2e',
+                '--background-secondary': '#2c2c2e',
+                '--background-secondary-alt': '#3a3a3c',
+                '--background-modifier-border': '#38383a',
+                '--background-modifier-form-field': '#2c2c2e',
+                '--text-normal': '#f5f5f7',
+                '--text-muted': '#8e8e93',
+                '--text-faint': '#636366',
+                '--text-accent': '#0a84ff',
+                '--text-accent-hover': '#409cff',
+                '--interactive-accent': '#0a84ff',
+                '--interactive-accent-hover': '#409cff',
+                '--nav-item-background-active': 'rgba(10, 132, 255, 0.18)',
+                '--nav-item-color-active': '#409cff',
+                '--code-background': '#121214',
+                '--code-normal': '#f5f5f7',
+                '--font-ui': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-article': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif',
+                '--font-heading': '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif',
+                '--font-mono': "'SF Mono', 'Menlo', monospace"
+              }
+            }
+          };
+
+          // 1. Dark Mode
+          var savedMode = localStorage.getItem('parma-theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = savedMode === 'dark' || (!savedMode && prefersDark);
+
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
+          }
+
+          // 2. Active Theme Variables
+          var savedTheme = localStorage.getItem('parma_selected_theme') || '';
+          var effectiveTheme = (savedTheme && savedTheme.trim() && savedTheme.trim() !== 'vault') ? savedTheme.trim() : 'parma-classic';
+          document.documentElement.setAttribute('data-parma-theme', savedTheme || 'parma-classic');
+
+          var preset = THEMES[effectiveTheme] || THEMES['parma-classic'];
+          function objToCss(o) {
+            var res = '';
+            for (var k in o) {
+              res += '  ' + k + ': ' + o[k] + ';\n';
+            }
+            return res;
+          }
+
+          var lightCss = objToCss(preset.light);
+          var darkCss = objToCss(preset.dark);
+          var customCss = localStorage.getItem('parma_custom_css') || '';
+
+          var styleEl = document.getElementById('parma-active-theme');
+          if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = 'parma-active-theme';
+            document.head.appendChild(styleEl);
+          }
+
+          var bgPrimary = isDark ? preset.dark['--background-primary'] : preset.light['--background-primary'];
+          document.documentElement.style.backgroundColor = bgPrimary;
+
+          styleEl.textContent =
+            ':root, body.theme-light, [data-theme="light"] {\n' + lightCss + '}\n' +
+            '.dark, body.theme-dark, [data-theme="dark"] {\n' + darkCss + '}\n' +
+            'html, body {\n' +
+            '  background-color: var(--background-primary) !important;\n' +
+            '  color: var(--text-normal) !important;\n' +
+            '  font-family: var(--font-ui, system-ui, -apple-system, sans-serif);\n' +
+            '}\n' +
+            (customCss ? '\n/* Saved Custom CSS */\n' + customCss : '');
+
+          var meta = document.getElementById('theme-color-meta');
+          if (meta) {
+            meta.setAttribute('content', bgPrimary);
+          }
+        } catch (e) {
+          console.warn('Parma theme pre-init error:', e);
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-wiki-light dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-150">
+  <body class="bg-wiki-light dark:bg-slate-900 text-slate-900 dark:text-slate-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
