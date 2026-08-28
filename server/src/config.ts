@@ -5,6 +5,25 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Automatically load .env if available
+try {
+  const envCandidates = [
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), '..', '.env'),
+    path.resolve(__dirname, '../../.env'),
+  ];
+  for (const envFile of envCandidates) {
+    if (fs.existsSync(envFile)) {
+      if (typeof process.loadEnvFile === 'function') {
+        process.loadEnvFile(envFile);
+      }
+      break;
+    }
+  }
+} catch {
+  // Ignore env loading errors
+}
+
 export function resolveDefaultVaultPath(): string {
   const envPath = process.env.VAULT_DIR || process.env.VAULT_PATH;
   if (envPath) {

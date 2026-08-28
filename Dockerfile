@@ -1,46 +1,41 @@
-# Stage 1: Build frontend and backend
-FROM node:20-alpine AS builder
-
+# Stage 1: Build Frontend
+FROM node:22-alpine AS client-builder
 WORKDIR /app
+COPY package.json package-lock.json ./
+COPY client/package.json ./client/
+RUN npm ci --workspace=client
+COPY client/ ./client/
+RUN npm run build:client
 
-# Copy dependency manifests
+# Stage 2: Build Backend
+FROM node:22-alpine AS server-builder
+WORKDIR /app
 COPY package.json package-lock.json ./
 COPY server/package.json ./server/
-COPY client/package.json ./client/
+RUN npm ci --workspace=server
+COPY server/ ./server/
+RUN npm run build:server
 
-# Install dependencies
-RUN npm ci
-
-# Copy source files
-COPY . .
-
-# Build client and server
-RUN npm run build
-
-# Stage 2: Production runtime image
-FROM node:20-alpine AS runner
-
+# Stage 3: Production Runner
+FROM node:22-alpine AS runner
 WORKDIR /app
-
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV VAULT_PATH=/vault
 
-# Copy root and server manifests
+# Copy package descriptors for workspaces
 COPY package.json package-lock.json ./
 COPY server/package.json ./server/
+COPY client/package.json ./client/
 
-# Install production dependencies only for server workspace
-RUN npm ci --omit=dev --workspace=server
+# Install only production dependencies
+RUN npm ci --omit=dev
 
-# Copy compiled artifacts
-COPY --from=builder /app/server/dist ./server/dist
-COPY --from=builder /app/client/dist ./client/dist
-COPY --from=builder /app/sample-vault ./sample-vault
+# Copy compiled assets from build stages
+COPY --from=client-builder /app/client/dist ./client/dist
+COPY --from=server-builder /app/server/dist ./server/dist
 
-# Vault storage mount point
-VOLUME ["/vault"]
-
+VOLUME /vault
 EXPOSE 3000
 
-CMD ["npm", "run", "start", "--workspace=server"]
+CMD ["node", "server/dist/index.js"]

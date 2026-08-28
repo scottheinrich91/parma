@@ -7,8 +7,16 @@
     color-scheme: light dark;
   }
 
+  html {
+    background-color: #f8fafc;
+  }
+
+  html.dark {
+    background-color: #0f172a;
+  }
+
   body {
-    @apply antialiased font-sans text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-950;
+    @apply antialiased font-sans text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900;
   }
 }
 

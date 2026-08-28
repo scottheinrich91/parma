@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
+  BookOpen,
+  Search,
   Plus,
   Network,
   Edit3,
+  Trash2,
   Folder,
   FolderOpen,
   FileText,
@@ -14,9 +17,8 @@ import {
   Sidebar as SidebarIcon,
   Home,
   RefreshCw,
-  Search,
-  Settings,
-  BookOpen,
+  Settings as SettingsIcon,
+  PanelRight,
 } from 'lucide-react';
 import {
   fetchVaultTree,
@@ -26,9 +28,9 @@ import {
   fetchBacklinks,
 } from './api';
 import { VaultNode, NoteData, BacklinkItem } from './types';
-import { TengwarLogo } from './components/TengwarLogo';
 import { NoteView } from './components/NoteView';
 import { NoteEditor } from './components/NoteEditor';
+import { DirectoryView } from './components/DirectoryView';
 import { TableOfContents } from './components/TableOfContents';
 import { BacklinksPanel } from './components/BacklinksPanel';
 import { GraphView } from './components/GraphView';
@@ -45,6 +47,118 @@ export default function App() {
   const [isLoadingNote, setIsLoadingNote] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
+  const [isDirectoryView, setIsDirectoryView] = useState<boolean>(false);
+
+  // Persistent Right Sidebar Open State
+  const [rightSidebarOpen, setRightSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('parma-right-sidebar-open');
+      return saved !== null ? saved === 'true' : true;
+    }
+    return true;
+  });
+
+  const toggleRightSidebar = () => {
+    setRightSidebarOpen((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('parma-right-sidebar-open', next.toString());
+      }
+      return next;
+    });
+  };
+
+  // Persistent Left Sidebar Open State (Desktop respects saved, Mobile defaults to closed)
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 768) return false;
+      const saved = localStorage.getItem('parma-sidebar-open');
+      return saved !== null ? saved === 'true' : true;
+    }
+    return false;
+  });
+
+  const toggleLeftSidebar = () => {
+    setSidebarOpen((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+        localStorage.setItem('parma-sidebar-open', next.toString());
+      }
+      return next;
+    });
+  };
+
+  // Resizable Sidebar Widths
+  const [leftWidth, setLeftWidth] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('parma-left-sidebar-width');
+      return saved ? parseInt(saved, 10) : 256;
+    }
+    return 256;
+  });
+
+  const [rightWidth, setRightWidth] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('parma-right-sidebar-width');
+      return saved ? parseInt(saved, 10) : 288;
+    }
+    return 288;
+  });
+
+  const leftWidthRef = useRef(leftWidth);
+  leftWidthRef.current = leftWidth;
+  const rightWidthRef = useRef(rightWidth);
+  rightWidthRef.current = rightWidth;
+
+  // Drag handler for Left Sidebar
+  const handleLeftMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = leftWidthRef.current;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.min(Math.max(startWidth + (moveEvent.clientX - startX), 180), 480);
+      setLeftWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      localStorage.setItem('parma-left-sidebar-width', leftWidthRef.current.toString());
+    };
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  // Drag handler for Right Sidebar
+  const handleRightMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = rightWidthRef.current;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.min(Math.max(startWidth - (moveEvent.clientX - startX), 200), 520);
+      setRightWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      localStorage.setItem('parma-right-sidebar-width', rightWidthRef.current.toString());
+    };
+
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
 
   // Wiki Identity & Home Configuration
   const [wikiTitle, setWikiTitle] = useState<string>(() => {
@@ -61,13 +175,84 @@ export default function App() {
     return 'Home.md';
   });
 
+  const [lightLogo, setLightLogo] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('parma-light-logo') || '/parma_dark.png';
+    }
+    return '/parma_dark.png';
+  });
+
+  const [darkLogo, setDarkLogo] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('parma-dark-logo') || '/parma_light.png';
+    }
+    return '/parma_light.png';
+  });
+
+  const [faviconUrl, setFaviconUrl] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('parma-favicon-url') || '/favicon.png';
+    }
+    return '/favicon.png';
+  });
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = faviconUrl;
+
+      // Apple Touch Icons for iOS Home Screen
+      const appleIcons = document.querySelectorAll("link[rel*='apple-touch-icon']");
+      appleIcons.forEach((el) => {
+        (el as HTMLLinkElement).href = faviconUrl;
+      });
+
+      localStorage.setItem('parma-favicon-url', faviconUrl);
+    }
+  }, [faviconUrl]);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const appleTitleMeta = document.getElementById('apple-app-title');
+      if (appleTitleMeta) {
+        appleTitleMeta.setAttribute('content', wikiTitle);
+      }
+      document.title = `${wikiTitle} — Lightweight Web Wiki`;
+    }
+  }, [wikiTitle]);
+
+  // Clean URL Helpers
+  const getCleanUrl = useCallback((rawPath: string) => {
+    if (!rawPath) return '/';
+    const customHome = (homeNote || 'Home.md').toLowerCase();
+    if (rawPath.toLowerCase() === customHome || rawPath.toLowerCase() === 'home.md' || rawPath.toLowerCase() === 'index.md') {
+      return '/';
+    }
+    return '/' + rawPath.split('/').map(encodeURIComponent).join('/');
+  }, [homeNote]);
+
+  const getPathFromUrl = useCallback((): string => {
+    if (typeof window === 'undefined') return '';
+    const params = new URLSearchParams(window.location.search);
+    const legacyNoteParam = params.get('note');
+    if (legacyNoteParam) return legacyNoteParam;
+
+    const pathname = window.location.pathname.replace(/^\/+/, '');
+    if (!pathname) return '';
+    return decodeURIComponent(pathname);
+  }, []);
+
   // Modals & Panels
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isGraphOpen, setIsGraphOpen] = useState<boolean>(false);
   const [isNewNoteOpen, setIsNewNoteOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [newNoteDefaultFolder, setNewNoteDefaultFolder] = useState<string>('');
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
   // Dark mode
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -82,12 +267,29 @@ export default function App() {
   });
 
   useEffect(() => {
+    const themeColor = isDark ? '#0f172a' : '#f8fafc';
     if (isDark) {
       document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
       localStorage.setItem('parma-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
       localStorage.setItem('parma-theme', 'light');
+    }
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.backgroundColor = themeColor;
+      document.body.style.backgroundColor = themeColor;
+
+      // Force WebKit / iOS Safari to update status bar color live
+      const existingMetas = document.querySelectorAll("meta[name='theme-color']");
+      existingMetas.forEach((m) => m.remove());
+
+      const newMeta = document.createElement('meta');
+      newMeta.setAttribute('name', 'theme-color');
+      newMeta.setAttribute('content', themeColor);
+      document.head.appendChild(newMeta);
     }
   }, [isDark]);
 
@@ -107,48 +309,116 @@ export default function App() {
     return paths;
   }, [tree]);
 
-  // Navigate to configured Home Note
-  const handleNavigateHome = useCallback(() => {
-    if (allNotePaths.length === 0) return;
+  // Load Note
+  const loadNote = useCallback(async (path: string) => {
+    if (!path) return;
+    setIsLoadingNote(true);
+    setIsDirectoryView(false);
+    try {
+      const data = await fetchNote(path);
+      setActiveNote(data);
+      setIsEditing(false);
 
-    const target = (homeNote || 'Home.md').trim();
-    const cleanTarget = target.replace(/\.md$/i, '').toLowerCase();
-
-    // Check exact path match or base name match or case-insensitive match
-    const found = allNotePaths.find((p) => {
-      const pClean = p.replace(/\.md$/i, '').toLowerCase();
-      const baseName = pClean.includes('/') ? pClean.substring(pClean.lastIndexOf('/') + 1) : pClean;
-      return pClean === cleanTarget || baseName === cleanTarget || p === target;
-    });
-
-    if (found) {
-      setActivePath(found);
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
+      // Load backlinks in background
+      try {
+        const bls = await fetchBacklinks(path);
+        setBacklinks(bls);
+      } catch (err) {
+        setBacklinks([]);
       }
-    } else {
-      // Fallback: Home.md -> Index.md -> first note
-      const fallback =
-        allNotePaths.find((p) => p.toLowerCase() === 'home.md' || p.toLowerCase() === 'index.md') ||
-        allNotePaths[0];
-      if (fallback) {
-        setActivePath(fallback);
-        if (window.innerWidth < 768) {
-          setSidebarOpen(false);
-        }
+    } catch (err: any) {
+      console.error('Failed to load note:', err);
+    } finally {
+      setIsLoadingNote(false);
+    }
+  }, []);
+
+  // Open a specific note (with clean history push)
+  const handleOpenNote = useCallback((path: string, pushToHistory: boolean = true) => {
+    setActivePath(path);
+    setIsDirectoryView(false);
+    loadNote(path);
+
+    if (pushToHistory && typeof window !== 'undefined') {
+      const targetUrl = getCleanUrl(path);
+      if (window.location.pathname + window.location.search !== targetUrl) {
+        window.history.pushState({ path, isDir: false }, '', targetUrl);
       }
     }
-  }, [allNotePaths, homeNote]);
 
-  // Load Tree & initial note
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  }, [loadNote, getCleanUrl]);
+
+  // Open a directory view (with clean history push)
+  const handleOpenDirectory = useCallback((folderPath: string, pushToHistory: boolean = true) => {
+    setActivePath(folderPath);
+    setActiveNote(null);
+    setIsDirectoryView(true);
+    setIsEditing(false);
+
+    if (pushToHistory && typeof window !== 'undefined') {
+      const targetUrl = getCleanUrl(folderPath);
+      if (window.location.pathname + window.location.search !== targetUrl) {
+        window.history.pushState({ path: folderPath, isDir: true }, '', targetUrl);
+      }
+    }
+
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  }, [getCleanUrl]);
+
+  // Navigate to designated home note
+  const handleNavigateHome = useCallback((pushToHistory: boolean = true) => {
+    const customHome = homeNote || localStorage.getItem('parma-home-note') || 'Home.md';
+    const targetHome = allNotePaths.find(
+      (p) =>
+        p.toLowerCase() === customHome.toLowerCase() ||
+        p.toLowerCase() === 'home.md' ||
+        p.toLowerCase() === 'index.md'
+    ) || allNotePaths[0] || 'Home.md';
+
+    handleOpenNote(targetHome, pushToHistory);
+  }, [allNotePaths, homeNote, handleOpenNote]);
+
+  // Load Tree
   const loadTree = useCallback(async () => {
     try {
       const data = await fetchVaultTree();
       setTree(data.tree);
       setVaultRoot(data.root);
 
-      // Default to configured Home Note, Index.md, or first file if no active path
-      if (!activePath && data.tree.length > 0) {
+      // Collect all directories to collapse them by default
+      const allDirs = new Set<string>();
+      const collectDirs = (nodes: VaultNode[]) => {
+        for (const n of nodes) {
+          if (n.type === 'directory') {
+            allDirs.add(n.path);
+            if (n.children) collectDirs(n.children);
+          }
+        }
+      };
+      collectDirs(data.tree);
+      setCollapsedFolders(allDirs);
+
+      // Route from active URL path on initial tree load
+      const urlPath = getPathFromUrl();
+      if (urlPath) {
+        if (urlPath.endsWith('.md') || urlPath.endsWith('.markdown')) {
+          handleOpenNote(urlPath, false);
+        } else {
+          const mdCandidate = urlPath + '.md';
+          const match = data.tree.some((n) => n.path === urlPath || n.path === mdCandidate);
+          if (match) {
+            handleOpenNote(mdCandidate, false);
+          } else {
+            handleOpenDirectory(urlPath, false);
+          }
+        }
+      } else {
+        const customHome = localStorage.getItem('parma-home-note') || 'Home.md';
         const flat: string[] = [];
         const findFirst = (nodes: VaultNode[]) => {
           for (const n of nodes) {
@@ -161,104 +431,78 @@ export default function App() {
         };
         findFirst(data.tree);
 
-        const target = (homeNote || 'Home.md').trim().toLowerCase();
-        const cleanTarget = target.replace(/\.md$/i, '');
+        const targetFirst = flat.find((p) => p.toLowerCase() === customHome.toLowerCase()) ||
+                            flat.find((p) => p.toLowerCase() === 'home.md' || p.toLowerCase() === 'index.md') ||
+                            flat[0] || '';
 
-        const defaultNote =
-          flat.find((p) => {
-            const pClean = p.toLowerCase().replace(/\.md$/i, '');
-            const baseName = pClean.includes('/') ? pClean.substring(pClean.lastIndexOf('/') + 1) : pClean;
-            return pClean === cleanTarget || baseName === cleanTarget || p.toLowerCase() === target;
-          }) ||
-          flat.find((p) => p.toLowerCase() === 'home.md' || p.toLowerCase() === 'index.md') ||
-          flat[0];
-
-        if (defaultNote) {
-          setActivePath(defaultNote);
+        if (targetFirst) {
+          handleOpenNote(targetFirst, false);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load vault tree:', err);
     }
-  }, [activePath, homeNote]);
+  }, [handleOpenNote, handleOpenDirectory, getPathFromUrl]);
 
   useEffect(() => {
     loadTree();
   }, [loadTree]);
 
-  // Load Active Note & Backlinks
-  const loadNote = useCallback(async (path: string) => {
-    if (!path) return;
-    setIsLoadingNote(true);
-    try {
-      const note = await fetchNote(path);
-      setActiveNote(note);
-      setIsEditing(false);
-
-      // Fetch backlinks
-      try {
-        const bl = await fetchBacklinks(path);
-        setBacklinks(bl);
-      } catch {
-        setBacklinks([]);
+  // Listen to Browser Back / Forward buttons (PopState)
+  useEffect(() => {
+    const handlePopState = () => {
+      const targetPath = getPathFromUrl();
+      if (targetPath) {
+        if (targetPath.endsWith('.md') || targetPath.endsWith('.markdown')) {
+          handleOpenNote(targetPath, false);
+        } else {
+          handleOpenDirectory(targetPath, false);
+        }
+      } else {
+        handleNavigateHome(false);
       }
-    } catch (err) {
-      console.error(`Failed to load note ${path}:`, err);
-      setActiveNote(null);
-    } finally {
-      setIsLoadingNote(false);
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    if (activePath) {
-      loadNote(activePath);
-    }
-  }, [activePath, loadNote]);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [handleOpenNote, handleOpenDirectory, handleNavigateHome, getPathFromUrl]);
 
-  // Update browser document title
-  useEffect(() => {
-    const pageTitle = activeNote?.path
-      ? `${activeNote.path.replace(/\.md$/i, '')} — ${wikiTitle}`
-      : wikiTitle;
-    document.title = pageTitle;
-  }, [activeNote, wikiTitle]);
-
-  // Keyboard shortcuts (Cmd+K / Ctrl+K for search, Cmd+E for edit, Cmd+G for graph)
+  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      // ⌘K or Ctrl+K for Search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setIsSearchOpen(true);
+        setIsSearchOpen((prev) => !prev);
       }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e') {
-        e.preventDefault();
-        if (activeNote) {
-          setIsEditing((prev) => !prev);
-        }
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'g') {
+      // ⌘G or Ctrl+G for Graph
+      if ((e.metaKey || e.ctrlKey) && e.key === 'g') {
         e.preventDefault();
         setIsGraphOpen((prev) => !prev);
+      }
+      // ⌘N or Ctrl+N for New Note
+      if ((e.metaKey || e.ctrlKey) && e.key === 'n' && !e.shiftKey) {
+        e.preventDefault();
+        setNewNoteDefaultFolder('');
+        setIsNewNoteOpen(true);
+      }
+      // ⌘E or Ctrl+E for Edit/View toggle
+      if ((e.metaKey || e.ctrlKey) && e.key === 'e' && activeNote && !isDirectoryView) {
+        e.preventDefault();
+        setIsEditing((prev) => !prev);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeNote]);
-
-  const handleOpenNote = (path: string) => {
-    setActivePath(path);
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false);
-    }
-  };
+  }, [activeNote, isDirectoryView]);
 
   const handleSaveNote = async (newContent: string) => {
     if (!activePath) return;
     await saveNote(activePath, newContent, activeNote?.frontmatter);
     await loadNote(activePath);
     await loadTree();
+    setIsEditing(false);
   };
 
   // Interactive task checkbox live sync handler
@@ -281,7 +525,7 @@ export default function App() {
     lines[lineIndex] = updatedLine;
     const newContent = lines.join('\n');
 
-    // Instant local state update for smooth UX
+    // Instant local state update for zero latency
     setActiveNote((prev) => (prev ? { ...prev, content: newContent } : null));
 
     // Persist to disk
@@ -293,28 +537,14 @@ export default function App() {
     }
   };
 
-  const handleDeleteNote = async () => {
-    if (!activePath) return;
-    if (!window.confirm(`Are you sure you want to delete "${activePath}"?`)) return;
-
-    try {
-      await deleteItem(activePath);
-      setActiveNote(null);
-      setActivePath('');
-      await loadTree();
-    } catch (err) {
-      console.error('Delete failed:', err);
-      alert('Failed to delete note');
-    }
-  };
-
   const handleQuickCreateNote = (targetName: string) => {
     const filename = targetName.endsWith('.md') ? targetName : `${targetName}.md`;
     setNewNoteDefaultFolder(filename.includes('/') ? filename.substring(0, filename.lastIndexOf('/')) : '');
     setIsNewNoteOpen(true);
   };
 
-  const toggleFolder = (folderPath: string) => {
+  const toggleFolder = (folderPath: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setCollapsedFolders((prev) => {
       const next = new Set(prev);
       if (next.has(folderPath)) {
@@ -330,28 +560,48 @@ export default function App() {
   const renderTreeNode = (node: VaultNode, depth: number = 0) => {
     if (node.type === 'directory') {
       const isCollapsed = collapsedFolders.has(node.path);
+      const isSelected = activePath === node.path;
+
       return (
         <div key={node.path} className="select-none">
           <div
-            onClick={() => toggleFolder(node.path)}
-            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 cursor-pointer transition-colors"
+            onClick={() => handleOpenDirectory(node.path)}
+            className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
+              isSelected
+                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-semibold'
+                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+            }`}
             style={{ paddingLeft: `${Math.max(8, depth * 14 + 8)}px` }}
           >
-            {isCollapsed ? (
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-            )}
-            {isCollapsed ? (
-              <Folder className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-            ) : (
-              <FolderOpen className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-            )}
-            <span className="truncate">{node.name}</span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span
+                onClick={(e) => toggleFolder(node.path, e)}
+                className="p-0.5 rounded hover:bg-slate-300/40 dark:hover:bg-slate-700/40 transition-colors"
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                )}
+              </span>
+              {isCollapsed ? (
+                <Folder className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+              ) : (
+                <FolderOpen className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+              )}
+              <span className="truncate">{node.name}</span>
+            </div>
           </div>
           {!isCollapsed && node.children && (
-            <div className="space-y-0.5">
-              {node.children.map((child) => renderTreeNode(child, depth + 1))}
+            <div className="space-y-0.5 mt-0.5">
+              {node.children
+                .slice()
+                .sort((a, b) => {
+                  if (a.type === 'directory' && b.type !== 'directory') return -1;
+                  if (a.type !== 'directory' && b.type === 'directory') return 1;
+                  return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+                })
+                .map((child) => renderTreeNode(child, depth + 1))}
             </div>
           )}
         </div>
@@ -362,6 +612,11 @@ export default function App() {
       const isMd = node.name.endsWith('.md') || node.name.endsWith('.markdown');
       if (!isMd) return null;
 
+      // Filter out root Home.md from repeating in the list below
+      if (depth === 0 && (node.name.toLowerCase() === 'home.md' || node.path.toLowerCase() === homeNote.toLowerCase())) {
+        return null;
+      }
+
       const isActive = activePath === node.path;
       const cleanName = node.name.replace(/\.md$|\.markdown$/i, '');
 
@@ -369,10 +624,10 @@ export default function App() {
         <div
           key={node.path}
           onClick={() => handleOpenNote(node.path)}
-          className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all ${
+          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
             isActive
-              ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-semibold border-l-2 border-blue-600 dark:border-blue-400'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-semibold'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-normal'
           }`}
           style={{ paddingLeft: `${Math.max(8, depth * 14 + 8)}px` }}
         >
@@ -389,25 +644,82 @@ export default function App() {
     return null;
   };
 
+  // Find root Home note if present
+  const rootHomeNode = useMemo(() => {
+    const customHomeClean = (homeNote || 'Home.md').toLowerCase();
+    return tree.find(
+      (n) =>
+        n.type === 'file' &&
+        (n.path.toLowerCase() === customHomeClean ||
+         n.name.toLowerCase() === 'home.md' ||
+         n.name.toLowerCase() === 'index.md')
+    );
+  }, [tree, homeNote]);
+
+  // Root Directories sorted alphabetically
+  const rootDirectories = useMemo(() => {
+    return tree
+      .filter((n) => n.type === 'directory')
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  }, [tree]);
+
+  // Root Markdown Files (excluding Home) sorted alphabetically
+  const rootFiles = useMemo(() => {
+    const customHomeClean = (homeNote || 'Home.md').toLowerCase();
+    return tree
+      .filter((n) => n.type === 'file' && (n.name.endsWith('.md') || n.name.endsWith('.markdown')))
+      .filter((n) => n.path.toLowerCase() !== customHomeClean && n.name.toLowerCase() !== 'home.md' && n.name.toLowerCase() !== 'index.md')
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  }, [tree, homeNote]);
+
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
-      {/* Sidebar */}
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans relative">
+      {/* Mobile Sidebar Overlay Backdrop (Clicking outside closes sidebar on mobile) */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs md:hidden transition-opacity cursor-pointer animate-in fade-in duration-150"
+          title="Click to close sidebar"
+        />
+      )}
+
+      {/* Left Navigation Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-30 flex flex-col w-64 bg-slate-100/90 dark:bg-slate-900/90 backdrop-blur border-r border-slate-200 dark:border-slate-800 transition-transform duration-200 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden'
+        style={
+          typeof window !== 'undefined' && window.innerWidth >= 768
+            ? { width: sidebarOpen ? `${leftWidth}px` : '0px' }
+            : undefined
+        }
+        className={`fixed md:relative inset-y-0 left-0 z-50 md:z-20 flex flex-col bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md border-r border-slate-200 dark:border-slate-800 transition-all duration-200 ease-in-out ${
+          sidebarOpen
+            ? 'translate-x-0 w-72 max-w-[80vw] md:max-w-none md:w-auto shadow-2xl md:shadow-none'
+            : '-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden'
         }`}
       >
-        {/* Header / Logo with navigation to Home Note */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-slate-200 dark:border-slate-800">
+        {/* Invisible Left Sidebar Resize Handle (Mouse changes to col-resize grabber on desktop when open) */}
+        {sidebarOpen && (
           <div
-            onClick={handleNavigateHome}
-            className="flex items-center gap-2 font-bold text-base tracking-tight text-slate-900 dark:text-slate-100 cursor-pointer hover:opacity-80 transition-opacity select-none"
+            onMouseDown={handleLeftMouseDown}
+            className="hidden md:block absolute right-0 top-0 bottom-0 w-2 cursor-col-resize select-none z-30 hover:bg-transparent"
+            title="Drag to resize sidebar"
+          />
+        )}
+
+        {/* Header / Logo with navigation to Home Note */}
+        <div className="flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))] sm:h-14 sm:pt-0">
+          <div
+            onClick={() => handleNavigateHome(true)}
+            className="flex items-center gap-2.5 font-bold text-base tracking-tight text-slate-900 dark:text-slate-100 cursor-pointer hover:opacity-85 transition-opacity select-none"
             title={`Go to Home (${homeNote || 'Home.md'})`}
           >
-            <TengwarLogo className="h-7 w-auto text-slate-800 dark:text-slate-100" />
-            <span className="truncate max-w-[100px]">{wikiTitle}</span>
-            <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-              Wiki
+            <img 
+              src={isDark ? darkLogo : lightLogo} 
+              alt={wikiTitle} 
+              className="h-6 w-auto object-contain"
+              onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+            />
+            <span className="font-serif font-bold text-lg tracking-wide text-slate-900 dark:text-slate-100 truncate max-w-[140px]">
+              {wikiTitle}
             </span>
           </div>
 
@@ -433,7 +745,7 @@ export default function App() {
         </div>
 
         {/* Quick Search Button */}
-        <div className="p-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
           <button
             onClick={() => setIsSearchOpen(true)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 shadow-xs hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer"
@@ -448,42 +760,56 @@ export default function App() {
           </button>
         </div>
 
-        {/* Vault File Tree */}
+        {/* Vault File Tree with Home pinned at Top, then Directories alphabetically */}
         <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
-          <div className="px-2 py-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            {vaultRoot}
+          {/* Pinned Home Row */}
+          <div
+            onClick={() => handleNavigateHome(true)}
+            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs cursor-pointer transition-colors mb-1 ${
+              (activePath === (rootHomeNode?.path || homeNote) || activePath.toLowerCase() === 'home.md' || activePath === '') && !isDirectoryView
+                ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-semibold'
+                : 'text-slate-800 dark:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-medium'
+            }`}
+          >
+            <Home className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <span className="truncate">Home</span>
           </div>
-          {tree.map((node) => renderTreeNode(node, 0))}
+
+          {/* Root Directories (Collapsed by default, Alphabetical) */}
+          {rootDirectories.map((dir) => renderTreeNode(dir, 0))}
+
+          {/* Root Files (Alphabetical) */}
+          {rootFiles.map((file) => renderTreeNode(file, 0))}
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-          <div className="flex items-center gap-1.5">
+        <div className="p-3 pb-8 sm:pb-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
+          <div className="flex items-center gap-1.5 pl-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>{allNotePaths.length} notes</span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              title="Vault Settings & Brand Config"
+              className="p-2.5 sm:p-1.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer min-w-[42px] min-h-[42px] sm:min-w-[32px] sm:min-h-[32px] flex items-center justify-center bg-slate-200/50 dark:bg-slate-800/60"
+            >
+              <SettingsIcon className="w-5 h-5 sm:w-4 sm:h-4" />
+            </button>
             <button
               onClick={() => setIsGraphOpen(true)}
               title="Knowledge Graph (⌘G)"
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2.5 sm:p-1.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer min-w-[42px] min-h-[42px] sm:min-w-[32px] sm:min-h-[32px] flex items-center justify-center bg-slate-200/50 dark:bg-slate-800/60"
             >
-              <Network className="w-4 h-4" />
+              <Network className="w-5 h-5 sm:w-4 sm:h-4" />
             </button>
             <button
               onClick={() => setIsDark((d) => !d)}
               title={isDark ? 'Light Mode' : 'Dark Mode'}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2.5 sm:p-1.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer min-w-[42px] min-h-[42px] sm:min-w-[32px] sm:min-h-[32px] flex items-center justify-center bg-slate-200/50 dark:bg-slate-800/60"
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              title="Settings & Identity"
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <Settings className="w-4 h-4" />
+              {isDark ? <Sun className="w-5 h-5 sm:w-4 sm:h-4" /> : <Moon className="w-5 h-5 sm:w-4 sm:h-4" />}
             </button>
           </div>
         </div>
@@ -492,59 +818,92 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white dark:bg-slate-900">
         {/* Top Navbar */}
-        <header className="h-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6">
+        <header className="border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 bg-white dark:bg-slate-900 pt-[env(safe-area-inset-top)] h-[calc(3.5rem+env(safe-area-inset-top))] sm:h-14 sm:pt-0 flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <button
-              onClick={() => setSidebarOpen((prev) => !prev)}
+              onClick={toggleLeftSidebar}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Toggle Sidebar"
+              title={sidebarOpen ? "Hide navigation sidebar" : "Show navigation sidebar"}
             >
               <SidebarIcon className="w-4 h-4" />
             </button>
 
-            {/* Breadcrumb Path */}
+            {/* Breadcrumb Path with Clickable Home Icon & Folder Segments */}
             <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 truncate">
               <button
-                onClick={handleNavigateHome}
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer p-0.5 rounded"
-                title={`Go to Home (${homeNote || 'Home.md'})`}
+                onClick={() => handleNavigateHome(true)}
+                title="Go to Home"
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
               >
                 <Home className="w-3.5 h-3.5" />
               </button>
               <span>/</span>
               {activePath ? (
-                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">
-                  {activePath}
-                </span>
+                <div className="flex items-center gap-1 truncate font-medium text-slate-800 dark:text-slate-200">
+                  {activePath.split('/').map((seg, i, arr) => {
+                    const isLast = i === arr.length - 1;
+                    const segPath = arr.slice(0, i + 1).join('/');
+                    const isFile = seg.endsWith('.md') || seg.endsWith('.markdown');
+
+                    return (
+                      <React.Fragment key={segPath}>
+                        {isLast ? (
+                          <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">
+                            {seg}
+                          </span>
+                        ) : (
+                          <>
+                            <span
+                              onClick={() => isFile ? handleOpenNote(segPath) : handleOpenDirectory(segPath)}
+                              className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline cursor-pointer truncate"
+                            >
+                              {seg}
+                            </span>
+                            <span>/</span>
+                          </>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
               ) : (
-                <span className="italic">No note selected</span>
+                <span className="italic">No document selected</span>
               )}
             </div>
           </div>
 
-          {/* Top-Right Action Bar: ONLY Graph toggle button and Edit / Viewing toggle button */}
+          {/* Action Bar */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsGraphOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-              title="Knowledge Graph (⌘G)"
             >
               <Network className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span className="hidden sm:inline">Graph</span>
             </button>
 
-            {activeNote && (
+            {activeNote && !isDirectoryView && (
               <button
                 onClick={() => setIsEditing((prev) => !prev)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                   isEditing
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-white shadow-xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
-                title={isEditing ? 'Switch to Reader Mode' : 'Edit Note (⌘E)'}
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>{isEditing ? 'Viewing' : 'Edit'}</span>
+              </button>
+            )}
+
+            {/* Desktop Right Sidebar (TOC & Backlinks) Toggle - Unobtrusive, matching Left Sidebar */}
+            {!isEditing && !isDirectoryView && activeNote && (
+              <button
+                onClick={toggleRightSidebar}
+                title={rightSidebarOpen ? "Hide Outline & Backlinks" : "Show Outline & Backlinks"}
+                className="hidden xl:flex items-center p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <PanelRight className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -552,13 +911,20 @@ export default function App() {
 
         {/* Content Body */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Main Article or Editor */}
+          {/* Main Article, Directory Index, or Editor */}
           <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-8">
             {isLoadingNote ? (
               <div className="flex items-center justify-center h-64 text-slate-400">
                 <RefreshCw className="w-6 h-6 animate-spin mr-2" />
-                <span>Loading note...</span>
+                <span>Loading document...</span>
               </div>
+            ) : isDirectoryView ? (
+              <DirectoryView
+                directoryPath={activePath}
+                tree={tree}
+                onOpenNote={handleOpenNote}
+                onOpenDirectory={handleOpenDirectory}
+              />
             ) : isEditing && activeNote ? (
               <NoteEditor
                 note={activeNote}
@@ -585,7 +951,7 @@ export default function App() {
                 </p>
                 <button
                   onClick={() => setIsNewNoteOpen(true)}
-                  className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Create First Note</span>
@@ -594,9 +960,18 @@ export default function App() {
             )}
           </div>
 
-          {/* Right Sidebar: Table of Contents & Backlinks (only in View Mode) */}
-          {!isEditing && activeNote && (
-            <aside className="hidden xl:flex flex-col w-72 p-6 border-l border-slate-200 dark:border-slate-800 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-900/50">
+          {/* Right Sidebar: Table of Contents & Backlinks (Toggleable & Resizable on Desktop) */}
+          {!isEditing && !isDirectoryView && activeNote && rightSidebarOpen && (
+            <aside 
+              style={{ width: `${rightWidth}px` }}
+              className="hidden xl:flex flex-col p-6 border-l border-slate-200 dark:border-slate-800 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-900/50 relative flex-shrink-0"
+            >
+              {/* Invisible Right Sidebar Resize Handle (Mouse changes to col-resize grabber) */}
+              <div
+                onMouseDown={handleRightMouseDown}
+                className="hidden xl:block absolute left-0 top-0 bottom-0 w-2 cursor-col-resize select-none z-20 hover:bg-transparent"
+                title="Drag to resize outline"
+              />
               <TableOfContents content={activeNote.content} />
               <BacklinksPanel backlinks={backlinks} onOpenNote={handleOpenNote} />
             </aside>
@@ -639,10 +1014,21 @@ export default function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         wikiTitle={wikiTitle}
-        onSaveWikiTitle={setWikiTitle}
+        onSaveWikiTitle={(t) => setWikiTitle(t)}
         homeNote={homeNote}
-        onSaveHomeNote={setHomeNote}
+        onSaveHomeNote={(h) => setHomeNote(h)}
+        lightLogo={lightLogo}
+        onSaveLightLogo={(l) => setLightLogo(l)}
+        darkLogo={darkLogo}
+        onSaveDarkLogo={(d) => setDarkLogo(d)}
+        faviconUrl={faviconUrl}
+        onSaveFaviconUrl={(f) => setFaviconUrl(f)}
         allNotePaths={allNotePaths}
+        onVaultChanged={async () => {
+          setActiveNote(null);
+          setActivePath('');
+          await loadTree();
+        }}
       />
     </div>
   );

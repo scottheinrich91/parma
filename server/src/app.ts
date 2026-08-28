@@ -14,6 +14,8 @@ import { createUploadRouter } from './routes/upload.js';
 import { mediaRouter } from './routes/media.js';
 import { createGraphRouter } from './routes/graph.js';
 import { createSearchRouter } from './routes/search.js';
+import { createVaultsRouter } from './routes/vaults.js';
+import { fsRouter } from './routes/fs.js';
 
 export function createApp() {
   const app = new Hono();
@@ -36,23 +38,32 @@ export function createApp() {
   };
 
   // Setup file watcher
-  try {
-    if (fs.existsSync(config.vaultPath)) {
-      const watcher = chokidar.watch(config.vaultPath, {
-        ignored: /(^|[\/\\])\..+/, // ignore dotfiles
-        persistent: true,
-        ignoreInitial: true,
-      });
-
-      watcher.on('all', (event, filePath) => {
-        if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {
-          triggerReindex();
-        }
-      });
+  let watcher: any = null;
+  const setupWatcher = (targetPath: string) => {
+    if (watcher) {
+      watcher.close();
+      watcher = null;
     }
-  } catch (err) {
-    console.warn('Failed to start vault file watcher:', err);
-  }
+    try {
+      if (fs.existsSync(targetPath)) {
+        watcher = chokidar.watch(targetPath, {
+          ignored: /(^|[\/\\])\..+/, // ignore dotfiles
+          persistent: true,
+          ignoreInitial: true,
+        });
+
+        watcher.on('all', (_event: string, filePath: string) => {
+          if (filePath.endsWith('.md') || filePath.endsWith('.markdown')) {
+            triggerReindex();
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to start vault file watcher:', err);
+    }
+  };
+
+  setupWatcher(config.vaultPath);
 
   // Middlewares
   app.use('*', cors());
@@ -60,12 +71,18 @@ export function createApp() {
   // API Routes
   const noteRouter = createNoteRouter(triggerReindex);
   const uploadRouter = createUploadRouter(triggerReindex);
+  const vaultsRouter = createVaultsRouter(graphService, searchService, (newPath) => {
+    setupWatcher(newPath);
+    triggerReindex();
+  });
 
   app.route('/api/tree', treeRouter);
   app.route('/api/note', noteRouter);
   app.route('/api/notes', noteRouter);
   app.route('/api/upload', uploadRouter);
   app.route('/api/media', mediaRouter);
+  app.route('/api/vaults', vaultsRouter);
+  app.route('/api/fs', fsRouter);
 
   const assetsRouter = new Hono();
   assetsRouter.post('/', async (c) => uploadRouter.fetch(c.req.raw));

@@ -264,29 +264,84 @@ export const NoteView: React.FC<NoteViewProps> = ({
     };
 
     const renderBasicInline = (inlineText: string, keyPrefix: string): React.ReactNode => {
-      // Inline markdown image: ![alt](url)
-      const mdImgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+      // 1. Parse standard markdown links and images: [text](url) and ![alt](url)
+      const linkOrImgRegex = /(!?\[([^\]]*)\]\(([^)]+)\))/g;
       let match;
       const elementsList: React.ReactNode[] = [];
       let lastIndex = 0;
 
-      while ((match = mdImgRegex.exec(inlineText)) !== null) {
+      while ((match = linkOrImgRegex.exec(inlineText)) !== null) {
         if (match.index > lastIndex) {
           elementsList.push(formatTextStyles(inlineText.substring(lastIndex, match.index), `${keyPrefix}-${lastIndex}`));
         }
-        const alt = match[1];
-        const src = match[2];
-        const mediaUrl = resolveMediaUrl(src);
-        elementsList.push(
-          <span key={`img-${match.index}`} className="inline-block my-2">
-            <img
-              src={mediaUrl}
-              alt={alt}
-              className="rounded-lg max-h-96 shadow-xs cursor-pointer hover:opacity-95 transition-opacity"
-              onClick={() => setLightboxImage(mediaUrl)}
-            />
-          </span>
-        );
+
+        const isImage = match[0].startsWith('!');
+        const label = match[2];
+        const target = match[3].trim();
+
+        if (isImage) {
+          const mediaUrl = resolveMediaUrl(target);
+          elementsList.push(
+            <span key={`img-${match.index}`} className="inline-block my-2">
+              <img
+                src={mediaUrl}
+                alt={label}
+                className="rounded-lg max-h-96 shadow-xs cursor-pointer hover:opacity-95 transition-opacity"
+                onClick={() => setLightboxImage(mediaUrl)}
+              />
+            </span>
+          );
+        } else {
+          // Standard markdown link or in-page anchor
+          if (target.startsWith('#')) {
+            const anchorId = target.slice(1);
+            elementsList.push(
+              <a
+                key={`anchor-${match.index}`}
+                href={target}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const targetEl = document.getElementById(anchorId) || 
+                                  document.getElementById(anchorId.toLowerCase()) || 
+                                  document.getElementById(anchorId.replace(/-+/g, '-')) ||
+                                  document.getElementById(anchorId.replace(/--/g, '-'));
+                  if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="text-blue-600 dark:text-blue-400 font-medium hover:underline cursor-pointer"
+              >
+                {formatTextStyles(label, `link-lbl-${match.index}`)}
+              </a>
+            );
+          } else if (target.startsWith('http://') || target.startsWith('https://')) {
+            elementsList.push(
+              <a
+                key={`ext-${match.index}`}
+                href={target}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 font-medium hover:underline inline-flex items-center gap-0.5"
+              >
+                <span>{formatTextStyles(label, `ext-lbl-${match.index}`)}</span>
+                <ExternalLink className="w-3 h-3 inline-block opacity-70" />
+              </a>
+            );
+          } else {
+            // Relative note link
+            const targetClean = target.replace(/^\.\//, '');
+            elementsList.push(
+              <span
+                key={`rel-${match.index}`}
+                onClick={() => onOpenNote(targetClean)}
+                className="wikilink group cursor-pointer text-blue-600 dark:text-blue-400 font-medium hover:underline"
+              >
+                <span>{formatTextStyles(label, `rel-lbl-${match.index}`)}</span>
+              </span>
+            );
+          }
+        }
+
         lastIndex = match.index + match[0].length;
       }
 

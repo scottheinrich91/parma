@@ -2,9 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z'/><path d='M6 6h10'/><path d='M6 10h10'/></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Parma — Lightweight Web Wiki</title>
+
+    <!-- Standard Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" id="parma-favicon" />
+    <link rel="shortcut icon" href="/favicon.png" />
+
+    <!-- Apple iOS Home Screen Web App Meta & Icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Parma" id="apple-app-title" />
+    <link rel="apple-touch-icon" href="/favicon.png" id="parma-apple-icon" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
+
+    <!-- Web App Manifest & Dynamic Theme Color -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" id="theme-color-meta" content="#f8fafc" />
   </head>
   <body class="bg-wiki-light dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-150">
     <div id="root"></div>

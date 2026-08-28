@@ -7,9 +7,15 @@ import { sanitizeRelativePath, resolveVaultPath, isSafeMediaExtension } from '..
 import { VaultGraphService } from '../src/services/graph.js';
 import { VaultSearchService } from '../src/services/search.js';
 import { createApp } from '../src/app.js';
-import { resolveDefaultVaultPath } from '../src/config.js';
+import { config } from '../src/config.js';
+import { fileURLToPath } from 'node:url';
 
-const TEST_VAULT = resolveDefaultVaultPath();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const TEST_VAULT = path.resolve(__dirname, '../../vault');
+process.env.VAULT_PATH = TEST_VAULT;
+config.vaultPath = TEST_VAULT;
 
 describe('Security Utilities', () => {
   it('sanitizes relative paths properly', () => {

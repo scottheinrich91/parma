@@ -81,3 +81,58 @@ export async function searchNotes(query: string): Promise<SearchResult[]> {
   const data = await res.json();
   return data.results || [];
 }
+
+export interface VaultOption {
+  id: string;
+  name: string;
+  path: string;
+  exists: boolean;
+  description: string;
+}
+
+export async function fetchVaults(): Promise<{ active: string; activeName: string; vaults: VaultOption[] }> {
+  const res = await fetch(`${API_BASE}/vaults`);
+  if (!res.ok) throw new Error('Failed to load vaults list');
+  return res.json();
+}
+
+export async function switchVault(targetPath: string): Promise<{ success: boolean; active: string }> {
+  const res = await fetch(`${API_BASE}/vaults/switch`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: targetPath }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to switch vault');
+  }
+  return res.json();
+}
+
+export interface FsEntry {
+  name: string;
+  path: string;
+  relativePath: string;
+  isDirectory: boolean;
+  extension: string;
+  size: number;
+}
+
+export interface FsBrowseResult {
+  currentPath: string;
+  relativePath: string;
+  parentPath: string | null;
+  entries: FsEntry[];
+  vaultRoot: string;
+}
+
+export async function browseFilesystem(path: string = '', filter: 'all' | 'notes' | 'images' | 'folders' = 'all'): Promise<FsBrowseResult> {
+  const params = new URLSearchParams();
+  if (path) params.set('path', path);
+  if (filter !== 'all') params.set('filter', filter);
+  const res = await fetch(`${API_BASE}/fs/browse?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to browse directory');
+  return res.json();
+}
+
+
