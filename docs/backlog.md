@@ -38,3 +38,7 @@
 - [ ] **Custom Theme Section Collapsed by Default:** Make the Custom Theme / Custom CSS editor collapsible and collapsed by default.
 - [ ] **.obsidian Theme Loading Deep Fix:** Fix and robustify .obsidian theme loading so external community themes from .obsidian/themes/ load cleanly and accurately.
 - [ ] **Mobile Tabs & View Overhaul (Obsidian Mobile / Chrome-Style):** Overhaul the mobile layout and mobile tabs experience to follow the Obsidian mobile app view (Chrome-style visual tab switcher, bottom toolbars, swipeable drawers).
+- [ ] **Visual Editor Image Rendering Fix:** Fix image and figure rendering inside the visual editor mode so co-located and standard images display accurately.
+- [ ] **Edit Mode & Tabs Workflow Rethink:** Redesign how edit mode is entered/exited with the active multi-tab workspace (e.g., per-tab edit state, reading/live preview/source toggle per tab).
+- [ ] **Deduplicate Graph Buttons:** Remove redundant Graph View buttons between the top header and sidebar footer.
+- [ ] **Right Sidebar Evaluation / Removal:** Evaluate removing the right sidebar altogether and streamlining Table of Contents / Backlinks into floating/inline or bottom sheet views.
