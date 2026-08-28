@@ -1,0 +1,14 @@
+services:
+  parma:
+    build: .
+    container_name: parma
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - VAULT_PATH=/vault
+      - NODE_ENV=production
+    volumes:
+      # Mount your local Markdown vault directory into the container
+      - ./vault:/vault

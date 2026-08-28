@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="#f8fafc"/>
+  <rect x="150" y="60" width="300" height="280" rx="12" fill="url(#metal)" stroke="#64748b" stroke-width="4"/>
+  <path d="M240 60 L230 20 L370 20 L360 60 Z" fill="#475569" stroke="#334155" stroke-width="3"/>
+  <rect x="250" y="10" width="100" height="10" rx="3" fill="#1e293b"/>
+  <circle cx="300" cy="130" r="35" fill="#ffffff" stroke="#475569" stroke-width="4"/>
+  <circle cx="300" cy="130" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="120 40"/>
+  <path d="M300 130 L315 110" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="300" cy="130" r="4" fill="#0f172a"/>
+  <rect x="260" y="190" width="80" height="25" rx="4" fill="#334155"/>
+  <path d="M270 215 L330 215 L320 240 L280 240 Z" fill="#64748b" stroke="#334155" stroke-width="2"/>
+  <rect x="330" y="220" width="70" height="14" rx="7" fill="#1e293b"/>
+  <path d="M380 190 L400 230 L395 270" fill="none" stroke="#94a3b8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="395" cy="272" r="4" fill="#64748b"/>
+  <rect x="160" y="290" width="280" height="40" rx="6" fill="#475569"/>
+  <line x1="180" y1="305" x2="420" y2="305" stroke="#94a3b8" stroke-width="3" stroke-dasharray="8 6"/>
+  <line x1="180" y1="315" x2="420" y2="315" stroke="#94a3b8" stroke-width="3" stroke-dasharray="8 6"/>
+  <path d="M285 260 L280 285 L315 285 L310 260 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="300" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#334155">Breville Barista Touch — Component Overview</text>
+</svg>

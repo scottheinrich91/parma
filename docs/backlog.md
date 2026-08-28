@@ -1,33 +1,32 @@
-# User Story Backlog — Parma
+# Product Backlog & Roadmap — Parma
 
-> **Status:** Draft  
-> **Organization:** Epics and prioritized user stories.
+## Phase 1: MVP Core (Current Sprint)
+- [x] Full-Stack TypeScript Architecture:
+  - [x] Node.js + Hono backend with REST endpoints:
+    - `/api/tree`: recursive vault directory scanner.
+    - `/api/note`: atomic read/write of markdown notes with frontmatter.
+    - `/api/upload`: multipart image upload into note's enclosing folder.
+    - `/api/media`: secure co-located asset streaming with MIME validation.
+    - `/api/graph`: in-memory wikilink graph indexer & backlink extractor.
+    - `/api/search`: fast full-text note search with highlighted snippets.
+  - [x] React + Vite + Tailwind CSS frontend:
+    - Wikipedia-inspired clean typography & responsive mobile layout.
+    - Reading mode with wikilink resolution, callouts, and co-located images.
+    - Markdown editor with toolbar and image upload modal.
+    - Backlinks panel and 2D interactive knowledge graph visualization.
+    - Global quick-open search modal (Cmd+K).
+- [x] Dockerfile & docker-compose.yml for easy container deployment.
+- [x] Rich sample-vault with household guides, appliances, recipes, callouts, and interconnected wikilinks.
+- [x] Automated unit and integration tests.
 
----
+## Phase 2: Enhanced Collaboration & Portability
+- [ ] Multi-vault switcher (switch between household, work, and personal vaults).
+- [ ] Bidirectional Git Sync integration with auto-commit / push on edit.
+- [ ] PDF export with print-ready Wikipedia-style stylesheet.
+- [ ] Offline PWA caching with Service Worker.
 
-## Epic 1: Core Filesystem & Vault Engine
-- [ ] **US1.1:** Single container Dockerfile mounting `/vault` volume.
-- [ ] **US1.2:** Recursive directory scanner generating nested JSON tree structure.
-- [ ] **US1.3:** Filesystem watcher (`inotify`) publishing change events over SSE/WebSocket.
-- [ ] **US1.4:** Safe atomic file CRUD (read, write, rename, create, delete).
-
-## Epic 2: Markdown & Wikilink Pipeline
-- [ ] **US2.1:** CommonMark rendering with Obsidian Callouts (`> [!NOTE]`).
-- [ ] **US2.2:** Bidirectional `[[wikilink]]` parser resolving cross-folder paths.
-- [ ] **US2.3:** YAML Frontmatter parsing for note metadata, tags, and custom titles.
-
-## Epic 3: Mobile UX & Non-Technical Editor
-- [ ] **US3.1:** Responsive mobile-first layout with touch-friendly navigation drawer and bottom bar.
-- [ ] **US3.2:** Visual/hybrid Markdown editor with rich formatting toolbar for non-technical users.
-- [ ] **US3.3:** Mobile camera & photo gallery upload sheet with custom filename and caption fields.
-- [ ] **US3.4:** Automatic in-directory image saving and Markdown figure insertion.
-- [ ] **US3.5:** Tap-to-zoom image lightbox for mobile view.
-
-## Epic 4: Knowledge Graph & Search
-- [ ] **US4.1:** In-memory link graph indexer calculating backlinks and forward links.
-- [ ] **US4.2:** Interactive 2D/3D force graph visualization on web and mobile canvas.
-- [ ] **US4.3:** Fast in-memory full-text search across titles, content, and tags.
-
-## Epic 5: Packaging & Documentation
-- [ ] **US5.1:** Multi-arch Docker images (amd64 / arm64) published to GitHub Container Registry (ghcr.io).
-- [ ] **US5.2:** Example docker-compose setups and homelab getting-started guide.
+## Phase 3: Advanced Intelligence & Automation
+- [ ] Unlinked mentions detection in reading and graph views.
+- [ ] Optional basic auth / token authentication for public internet reverse-proxy setups.
+- [ ] Daily notes calendar and template engine.
+- [ ] Excalidraw / Mermaid diagram live rendering in reader mode.

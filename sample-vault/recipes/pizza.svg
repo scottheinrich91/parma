@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="pizzacrust" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#fef08a"/>
+      <stop offset="90%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="#f8fafc"/>
+  <!-- Pizza Peel / Base -->
+  <circle cx="300" cy="200" r="150" fill="url(#pizzacrust)" stroke="#b45309" stroke-width="5"/>
+  <!-- Tomato Sauce -->
+  <circle cx="300" cy="200" r="120" fill="#dc2626"/>
+  <!-- Melted Fresh Mozzarella / Fior di Latte Islands -->
+  <circle cx="270" cy="170" r="28" fill="#fefce8" stroke="#fef08a" stroke-width="2"/>
+  <circle cx="340" cy="180" r="24" fill="#fefce8" stroke="#fef08a" stroke-width="2"/>
+  <circle cx="290" cy="240" r="32" fill="#fefce8" stroke="#fef08a" stroke-width="2"/>
+  <circle cx="345" cy="235" r="20" fill="#fefce8" stroke="#fef08a" stroke-width="2"/>
+  <circle cx="235" cy="210" r="18" fill="#fefce8" stroke="#fef08a" stroke-width="2"/>
+  <!-- Charred Leopard Spots -->
+  <circle cx="230" cy="90" r="5" fill="#1c1917"/>
+  <circle cx="370" cy="95" r="6" fill="#1c1917"/>
+  <circle cx="420" cy="160" r="7" fill="#1c1917"/>
+  <circle cx="430" cy="240" r="5" fill="#1c1917"/>
+  <circle cx="175" cy="220" r="6" fill="#1c1917"/>
+  <circle cx="280" cy="340" r="7" fill="#1c1917"/>
+  <!-- Fresh Basil Leaves -->
+  <path d="M295 190 Q315 170 330 190 Q315 210 295 190 Z" fill="#16a34a" stroke="#15803d" stroke-width="1.5"/>
+  <path d="M250 220 Q265 205 275 220 Q265 235 250 220 Z" fill="#16a34a" stroke="#15803d" stroke-width="1.5"/>
+  <path d="M310 230 Q330 215 340 230 Q330 245 310 230 Z" fill="#16a34a" stroke="#15803d" stroke-width="1.5"/>
+  <text x="300" y="380" text-anchor="middle" font-family="Georgia, serif" font-size="16" font-style="italic" fill="#334155">Neapolitan Pizza Margherita (60-Second Bake)</text>
+</svg>

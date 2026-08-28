@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="crust" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#d97706"/>
+      <stop offset="70%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </radialGradient>
+    <linearGradient id="score" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="#fffbeb"/>
+  <!-- Cutting Board -->
+  <rect x="80" y="310" width="440" height="35" rx="8" fill="#b45309" stroke="#78350f" stroke-width="2"/>
+  <rect x="70" y="325" width="460" height="15" rx="4" fill="#92400e"/>
+  <!-- Sourdough Boule Body -->
+  <ellipse cx="300" cy="270" rx="190" ry="110" fill="url(#crust)" stroke="#78350f" stroke-width="3"/>
+  <!-- Blistered Flour Dusting -->
+  <ellipse cx="270" cy="230" rx="120" ry="60" fill="#fef3c7" opacity="0.4"/>
+  <!-- Expansion Ear & Score Line -->
+  <path d="M170 260 Q260 170 410 230" fill="none" stroke="url(#score)" stroke-width="22" stroke-linecap="round"/>
+  <path d="M180 255 Q270 175 400 230" fill="none" stroke="#fffbeb" stroke-width="8" stroke-linecap="round"/>
+  <path d="M190 235 Q280 155 390 215" fill="none" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>
+  <!-- Small Decorative Blade Wheat Cuts -->
+  <path d="M220 280 L235 295 M260 290 L275 305 M330 295 L345 310" stroke="#fef08a" stroke-width="3" stroke-linecap="round"/>
+  <!-- Caption -->
+  <text x="300" y="380" text-anchor="middle" font-family="Georgia, serif" font-size="16" font-style="italic" fill="#78350f">Artisan Open-Crumb Country Sourdough Loaf</text>
+</svg>
