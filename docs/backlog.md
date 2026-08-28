@@ -20,6 +20,7 @@
 - [x] Automated unit and integration tests.
 
 ## Phase 2: Enhanced Collaboration & Portability
+- [ ] Change default internal/server port to 3791 (Ring Verse convention across backend, client proxy, and Dockerfile).
 - [ ] Multi-vault switcher (switch between household, work, and personal vaults).
 - [ ] Bidirectional Git Sync integration with auto-commit / push on edit.
 - [ ] PDF export with print-ready Wikipedia-style stylesheet.
