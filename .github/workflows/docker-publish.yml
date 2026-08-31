@@ -3,9 +3,6 @@ name: Build and Push Docker Image
 on:
   push:
     branches: [ "main" ]
-  schedule:
-    # 08:00 UTC = 01:00 AM PDT (Nightly build)
-    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
@@ -35,7 +32,6 @@ jobs:
           images: scottheinrich91/parma
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-            type=raw,value=nightly,enable=${{ github.event_name == 'schedule' }}
             type=sha,format=short,prefix=sha-
 
       - name: Build and push Docker image
